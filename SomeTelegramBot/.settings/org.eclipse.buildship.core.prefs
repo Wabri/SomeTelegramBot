@@ -1,7 +1,2 @@
-#Fri Jan 05 16:23:01 CET 2018
-connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
-override.workspace.settings=true
-gradle.user.home=/home/wabri/.gradle
+#Fri Jan 05 17:06:26 CET 2018
 connection.project.dir=
-offline.mode=false
-build.scans.enabled=false
