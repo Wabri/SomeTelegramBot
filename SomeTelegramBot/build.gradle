@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+ 	compile 'org.telegram:telegrambots:3.5'
+}
+
