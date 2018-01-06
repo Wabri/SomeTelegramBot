@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.telegram.telegrambots.api.objects.Contact;
+
 import some.telegram.bot.core.UserGame;
 
 public class ManagerUsersGame {
@@ -31,6 +33,14 @@ public class ManagerUsersGame {
 			Collections.sort(listOfUsers, (gamerX, gamerY) -> gamerX.getPoints() < gamerY.getPoints() ? -1
 					: gamerX.getPoints() >= gamerY.getPoints() ? 0 : 1);
 		}
+	}
+
+	public boolean containUserGameContact(Contact contact) {
+		return false;
+	}
+
+	public UserGame getUserGame(Contact contact) {
+		return null;
 	}
 
 }
