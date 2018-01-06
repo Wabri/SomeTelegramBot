@@ -45,6 +45,11 @@ public class ManagerUsersGame {
 	}
 
 	public UserGame getUserGame(Contact contact) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getContact().equals(contact)) {
+				return userGame;
+			}
+		}
 		return null;
 	}
 
