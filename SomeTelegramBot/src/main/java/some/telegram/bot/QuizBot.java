@@ -18,10 +18,14 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	ManagerUsersGame managerUsersGame;
 	ManagerUsersGame unknownUserGame;
+	private String botUsername;
+	private String botToken;
 
-	public QuizBot() {
+	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
 		unknownUserGame = new ManagerUsersGame();
+		this.botUsername = botUsername;
+		this.botToken = botToken;
 	}
 
 	@Override
@@ -99,12 +103,12 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	@Override
 	public String getBotUsername() {
-		return null;
+		return botUsername;
 	}
 
 	@Override
 	public String getBotToken() {
-		return null;
+		return botToken;
 	}
 
 }
