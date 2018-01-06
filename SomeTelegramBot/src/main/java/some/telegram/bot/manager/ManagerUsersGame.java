@@ -36,10 +36,20 @@ public class ManagerUsersGame {
 	}
 
 	public boolean containUserGameContact(Contact contact) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getContact().equals(contact)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
 	public UserGame getUserGame(Contact contact) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getContact().equals(contact)) {
+				return userGame;
+			}
+		}
 		return null;
 	}
 
