@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.Contact;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -31,12 +31,14 @@ public class QuizBot extends TelegramLongPollingBot {
 	@Override
 	public void onUpdateReceived(Update update) {
 		try {
-			Contact contact = update.getMessage().getContact();
+			User user = update.getMessage().getFrom();
 			String receivedMessage = update.getMessage().getText();
-			if (!managerUsersGame.containUserGameContact(contact) && !unknownUserGame.containUserGameContact(contact)) {
-				UserGame newGamer = new UserGame(contact, update.getMessage().getChat());
-				unknownUserGame.addUserGame(newGamer);
+			if (managerUsersGame.containUserGame(user)) {
+
+			} else if (!unknownUserGame.containUserGame(user)) {
+				UserGame newGamer = new UserGame(user, update.getMessage().getChat());
 				if (receivedMessage.equals("/start")) {
+					unknownUserGame.addUserGame(newGamer);
 					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 					List<KeyboardRow> keyboard = new ArrayList<>();
 					KeyboardRow row = new KeyboardRow();
@@ -46,11 +48,18 @@ public class QuizBot extends TelegramLongPollingBot {
 					keyboardMarkup.setKeyboard(keyboard);
 					SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", keyboardMarkup);
 				} else {
-					SendTextMessage(newGamer.getChat().getId(),
-							"Per avere informazioni devi inserire il comando /start");
+					unknownUserGame.removeUserGame(newGamer);
+					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+					List<KeyboardRow> keyboard = new ArrayList<>();
+					KeyboardRow row = new KeyboardRow();
+					row.add("/start");
+					keyboard.add(row);
+					keyboardMarkup.setKeyboard(keyboard);
+					SendTextMessageWithKeyboard(newGamer.getChat().getId(),
+							"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", keyboardMarkup);
 				}
-			} else if (unknownUserGame.containUserGameContact(contact)) {
-				UserGame userGame = unknownUserGame.getUserGame(contact);
+			} else if (unknownUserGame.containUserGame(user)) {
+				UserGame userGame = unknownUserGame.getUserGame(user);
 				if (receivedMessage.equals("Si!")) {
 					managerUsersGame.addUserGame(userGame);
 					unknownUserGame.removeUserGame(userGame);

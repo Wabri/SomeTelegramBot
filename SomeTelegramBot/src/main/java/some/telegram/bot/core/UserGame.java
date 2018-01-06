@@ -1,22 +1,22 @@
 package some.telegram.bot.core;
 
 import org.telegram.telegrambots.api.objects.Chat;
-import org.telegram.telegrambots.api.objects.Contact;
+import org.telegram.telegrambots.api.objects.User;
 
 public class UserGame {
 
-	private Contact contact;
+	private User user;
 	private Chat chat;
 	private int points;
 
-	public UserGame(Contact contact, Chat chat) {
-		this.contact = contact;
+	public UserGame(User user, Chat chat) {
+		this.user = user;
 		this.chat = chat;
 		points = 0;
 	}
 
-	public Contact getContact() {
-		return contact;
+	public User getUser() {
+		return user;
 	}
 
 	public int getPoints() {
