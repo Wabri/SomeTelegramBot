@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.telegram.telegrambots.api.objects.Contact;
+import org.telegram.telegrambots.api.objects.User;
 
 import some.telegram.bot.core.UserGame;
 
@@ -35,18 +35,18 @@ public class ManagerUsersGame {
 		}
 	}
 
-	public boolean containUserGameContact(Contact contact) {
+	public boolean containUserGame(User user) {
 		for (UserGame userGame : listOfUsers) {
-			if (userGame.getContact().equals(contact)) {
+			if (userGame.getUser().getId().equals(user.getId())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public UserGame getUserGame(Contact contact) {
+	public UserGame getUserGame(User user) {
 		for (UserGame userGame : listOfUsers) {
-			if (userGame.getContact().equals(contact)) {
+			if (userGame.getUser().getId().equals(user.getId())) {
 				return userGame;
 			}
 		}
