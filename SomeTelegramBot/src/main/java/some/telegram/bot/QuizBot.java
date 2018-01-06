@@ -37,61 +37,64 @@ public class QuizBot extends TelegramLongPollingBot {
 
 			} else if (!unknownUserGame.containUserGame(user)) {
 				UserGame newGamer = new UserGame(user, update.getMessage().getChat());
-				if (receivedMessage.equals("/start")) {
+				KeyboardRow row;
+				switch (receivedMessage) {
+				case "/start":
 					unknownUserGame.addUserGame(newGamer);
-					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-					List<KeyboardRow> keyboard = new ArrayList<>();
-					KeyboardRow row = new KeyboardRow();
+					row = new KeyboardRow();
 					row.add("Si!");
 					row.add("No!");
-					keyboard.add(row);
-					keyboardMarkup.setKeyboard(keyboard);
-					SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", keyboardMarkup);
-				} else {
+					SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?",
+							extractKeyboardMarkup(row));
+					break;
+				default:
 					unknownUserGame.removeUserGame(newGamer);
-					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-					List<KeyboardRow> keyboard = new ArrayList<>();
-					KeyboardRow row = new KeyboardRow();
+					row = new KeyboardRow();
 					row.add("/start");
-					keyboard.add(row);
-					keyboardMarkup.setKeyboard(keyboard);
 					SendTextMessageWithKeyboard(newGamer.getChat().getId(),
-							"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", keyboardMarkup);
+							"Non so chi sei... Per iniziare a giocare clicca il pulsante start!",
+							extractKeyboardMarkup(row));
+					break;
 				}
 			} else if (unknownUserGame.containUserGame(user)) {
 				UserGame userGame = unknownUserGame.getUserGame(user);
-				if (receivedMessage.equals("Si!")) {
+				KeyboardRow row;
+				switch (receivedMessage) {
+				case "Si!":
 					managerUsersGame.addUserGame(userGame);
 					unknownUserGame.removeUserGame(userGame);
-					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-					List<KeyboardRow> keyboard = new ArrayList<>();
-					KeyboardRow row = new KeyboardRow();
+					row = new KeyboardRow();
 					row.add("A");
 					row.add("B");
 					row.add("C");
 					row.add("D");
-					keyboard.add(row);
-					keyboardMarkup.setKeyboard(keyboard);
 					SendTextMessageWithKeyboard(userGame.getChat().getId(),
 							"Sei stato aggiunto alla lista dei partecipanti! Ora dovrai solo aspettare l'inizio del gioco!",
-							keyboardMarkup);
-				} else if (receivedMessage.equals("No!")) {
+							extractKeyboardMarkup(row));
+					break;
+				case "No!":
 					unknownUserGame.removeUserGame(userGame);
-					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-					List<KeyboardRow> keyboard = new ArrayList<>();
-					KeyboardRow row = new KeyboardRow();
+					row = new KeyboardRow();
 					row.add("/start");
-					keyboard.add(row);
-					keyboardMarkup.setKeyboard(keyboard);
 					SendTextMessageWithKeyboard(userGame.getChat().getId(), "Se cambi idea clica sul pulsante start!",
-							keyboardMarkup);
-				} else {
+							extractKeyboardMarkup(row));
+					break;
+				default:
 					SendTextMessage(userGame.getChat().getId(), "Devi rispondere o Si! o No!");
+					break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private ReplyKeyboardMarkup extractKeyboardMarkup(KeyboardRow row1) {
+		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+		List<KeyboardRow> keyboard = new ArrayList<>();
+		keyboard.add(row1);
+		keyboardMarkup.setKeyboard(keyboard);
+		return keyboardMarkup;
 	}
 
 	private void SendTextMessageWithKeyboard(Long chatId, String text, ReplyKeyboardMarkup keyboardMarkup) {
