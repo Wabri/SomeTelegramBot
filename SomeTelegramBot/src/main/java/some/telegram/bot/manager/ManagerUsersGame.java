@@ -36,6 +36,11 @@ public class ManagerUsersGame {
 	}
 
 	public boolean containUserGameContact(Contact contact) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getContact().equals(contact)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
