@@ -40,4 +40,8 @@ public class Question {
 	public String toString() {
 		return "Domanda = " + question + ", Risposta giusta = " + rightQuestion + ", Punti = " + points;
 	}
+
+	public String limitedToString() {
+		return question + " -> " + rightQuestion + " -> " + points;
+	}
 }

@@ -58,6 +58,8 @@ public class QuizBot extends TelegramLongPollingBot {
 										extractKeyboardMarkup(row1, row2));
 								break;
 							case ("listadomande"):
+								SendTextMessage(master.getChat().getId(),
+										"Ecco la lista delle domande:\n\r" + masterUsersGame.getStringListOfQuestion());
 								break;
 							case ("listagiocatori"):
 								managerUsersGame.orderGamersList();
@@ -115,7 +117,7 @@ public class QuizBot extends TelegramLongPollingBot {
 						row2.add("nuovomaster");
 						SendTextMessageWithKeyboard(master.getChat().getId(),
 								"La domanda creata è: \n\r" + masterUsersGame.getListOfQuestion()
-										.get(master.getSettingQuestion()).toString(),
+										.get(master.getSettingQuestion() - 1).toString(),
 								extractKeyboardMarkup(row1, row2));
 						master.setSettingQuestion(0);
 						master.setSettingRightQuestion("");

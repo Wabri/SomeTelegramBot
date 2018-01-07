@@ -15,7 +15,7 @@ public class MasterUsersGame extends ManagerUsersGame {
 		super();
 		this.acceptNewMaster = acceptNewMaster;
 		listOfQuestion = new ArrayList<Question>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 1; i <= 20; i++) {
 			listOfQuestion.add(new Question(i, "", 0));
 		}
 	}
@@ -29,7 +29,9 @@ public class MasterUsersGame extends ManagerUsersGame {
 	}
 
 	public void addNewQuestion(int settingQuestion, String settingRightQuestion, int points) {
-		listOfQuestion.add(settingQuestion, new Question(settingQuestion, settingRightQuestion, points));
+		Question question = listOfQuestion.get(settingQuestion - 1);
+		question.setRightQuestion(settingRightQuestion);
+		question.setPoints(points);
 	}
 
 	public List<Question> getListOfQuestion() {
@@ -38,6 +40,14 @@ public class MasterUsersGame extends ManagerUsersGame {
 
 	public void setListOfQuestion(List<Question> listOfQuestion) {
 		this.listOfQuestion = listOfQuestion;
+	}
+
+	public String getStringListOfQuestion() {
+		String questionList = "";
+		for (Question question : listOfQuestion) {
+			questionList += question.limitedToString() + "\n\r";
+		}
+		return questionList;
 	}
 
 }
