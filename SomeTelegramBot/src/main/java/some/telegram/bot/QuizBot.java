@@ -16,16 +16,21 @@ import some.telegram.bot.manager.ManagerUsersGame;
 
 public class QuizBot extends TelegramLongPollingBot {
 
-	ManagerUsersGame managerUsersGame;
-	ManagerUsersGame unknownUserGame;
+	private ManagerUsersGame managerUsersGame;
+	private ManagerUsersGame unknownUserGame;
+	private MasterUsersGame masterUsersGame;
 	private String botUsername;
 	private String botToken;
+	private String accessPassword;
 
 	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
 		unknownUserGame = new ManagerUsersGame();
+		masterUsersGame = new MasterUsersGame(true);
 		this.botUsername = botUsername;
 		this.botToken = botToken;
+		this.accessPassword = String.valueOf(Math.random() * 1000000);
+		System.out.println(accessPassword);
 	}
 
 	@Override
@@ -33,7 +38,9 @@ public class QuizBot extends TelegramLongPollingBot {
 		try {
 			User user = update.getMessage().getFrom();
 			String receivedMessage = update.getMessage().getText();
-			if (managerUsersGame.containUserGame(user)) {
+			if (masterUsersGame.containUserGame(user)) {
+
+			} else if (managerUsersGame.containUserGame(user)) {
 
 			} else if (!unknownUserGame.containUserGame(user)) {
 				UserGame newGamer = new UserGame(user, update.getMessage().getChat());
@@ -59,29 +66,37 @@ public class QuizBot extends TelegramLongPollingBot {
 			} else if (unknownUserGame.containUserGame(user)) {
 				UserGame userGame = unknownUserGame.getUserGame(user);
 				KeyboardRow row;
-				switch (receivedMessage) {
-				case "Si!":
-					managerUsersGame.addUserGame(userGame);
-					unknownUserGame.removeUserGame(userGame);
-					row = new KeyboardRow();
-					row.add("A");
-					row.add("B");
-					row.add("C");
-					row.add("D");
-					SendTextMessageWithKeyboard(userGame.getChat().getId(),
-							"Sei stato aggiunto alla lista dei partecipanti! Ora dovrai solo aspettare l'inizio del gioco!",
-							extractKeyboardMarkup(row));
-					break;
-				case "No!":
-					unknownUserGame.removeUserGame(userGame);
-					row = new KeyboardRow();
-					row.add("/start");
-					SendTextMessageWithKeyboard(userGame.getChat().getId(), "Se cambi idea clica sul pulsante start!",
-							extractKeyboardMarkup(row));
-					break;
-				default:
-					SendTextMessage(userGame.getChat().getId(), "Devi rispondere o Si! o No!");
-					break;
+				if (receivedMessage.equals("/master " + accessPassword)) {
+					if (masterUsersGame.isAcceptNewMaster()) {
+
+					} else {
+
+					}
+				} else {
+					switch (receivedMessage) {
+					case "Si!":
+						managerUsersGame.addUserGame(userGame);
+						unknownUserGame.removeUserGame(userGame);
+						row = new KeyboardRow();
+						row.add("A");
+						row.add("B");
+						row.add("C");
+						row.add("D");
+						SendTextMessageWithKeyboard(userGame.getChat().getId(),
+								"Sei stato aggiunto alla lista dei partecipanti! Ora dovrai solo aspettare l'inizio del gioco!",
+								extractKeyboardMarkup(row));
+						break;
+					case "No!":
+						unknownUserGame.removeUserGame(userGame);
+						row = new KeyboardRow();
+						row.add("/start");
+						SendTextMessageWithKeyboard(userGame.getChat().getId(),
+								"Se cambi idea clica sul pulsante start!", extractKeyboardMarkup(row));
+						break;
+					default:
+						SendTextMessage(userGame.getChat().getId(), "Devi rispondere o Si! o No!");
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {
