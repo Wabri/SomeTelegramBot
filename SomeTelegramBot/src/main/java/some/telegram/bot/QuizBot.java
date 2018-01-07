@@ -29,7 +29,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		masterUsersGame = new MasterUsersGame(true);
 		this.botUsername = botUsername;
 		this.botToken = botToken;
-		this.accessPassword = String.valueOf(Math.random() * 1000000);
+		this.accessPassword = String.valueOf((int) (Math.random() * 123456789));
 		System.out.println(accessPassword);
 	}
 
@@ -39,7 +39,13 @@ public class QuizBot extends TelegramLongPollingBot {
 			User user = update.getMessage().getFrom();
 			String receivedMessage = update.getMessage().getText();
 			if (masterUsersGame.containUserGame(user)) {
-
+				switch (receivedMessage) {
+				case ("nuovadomanda"):
+				case ("listadomande"):
+				case ("listagiocatori"):
+				case ("ordinagiocatori"):
+				default:
+				}
 			} else if (managerUsersGame.containUserGame(user)) {
 
 			} else if (!unknownUserGame.containUserGame(user)) {
@@ -65,30 +71,44 @@ public class QuizBot extends TelegramLongPollingBot {
 				}
 			} else if (unknownUserGame.containUserGame(user)) {
 				UserGame userGame = unknownUserGame.getUserGame(user);
-				KeyboardRow row;
 				if (receivedMessage.equals("/master " + accessPassword)) {
 					if (masterUsersGame.isAcceptNewMaster()) {
-
+						masterUsersGame.addUserGame(userGame);
+						unknownUserGame.removeUserGame(userGame);
+						masterUsersGame.setAcceptNewMaster(false);
+						KeyboardRow row1 = new KeyboardRow();
+						row1.add("nuovadomanda");
+						row1.add("listadomande");
+						KeyboardRow row2 = new KeyboardRow();
+						row2.add("listadeigiocatori");
+						row2.add("ordinagiocatori");
+						SendTextMessageWithKeyboard(userGame.getChat().getId(), "Sei il nuovo master, cosa vuoi fare?",
+								extractKeyboardMarkup(row1, row2));
 					} else {
-
+						unknownUserGame.removeUserGame(userGame);
+						KeyboardRow row = new KeyboardRow();
+						row.add("/start");
+						SendTextMessageWithKeyboard(userGame.getChat().getId(),
+								"La possibilità di diventare master è stata disabilitata!", extractKeyboardMarkup(row));
 					}
 				} else {
 					switch (receivedMessage) {
 					case "Si!":
 						managerUsersGame.addUserGame(userGame);
 						unknownUserGame.removeUserGame(userGame);
-						row = new KeyboardRow();
-						row.add("A");
-						row.add("B");
-						row.add("C");
-						row.add("D");
+						KeyboardRow row1 = new KeyboardRow();
+						row1.add("A");
+						row1.add("B");
+						KeyboardRow row2 = new KeyboardRow();
+						row2.add("C");
+						row2.add("D");
 						SendTextMessageWithKeyboard(userGame.getChat().getId(),
 								"Sei stato aggiunto alla lista dei partecipanti! Ora dovrai solo aspettare l'inizio del gioco!",
-								extractKeyboardMarkup(row));
+								extractKeyboardMarkup(row1, row2));
 						break;
 					case "No!":
 						unknownUserGame.removeUserGame(userGame);
-						row = new KeyboardRow();
+						KeyboardRow row = new KeyboardRow();
 						row.add("/start");
 						SendTextMessageWithKeyboard(userGame.getChat().getId(),
 								"Se cambi idea clica sul pulsante start!", extractKeyboardMarkup(row));
@@ -102,6 +122,15 @@ public class QuizBot extends TelegramLongPollingBot {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private ReplyKeyboardMarkup extractKeyboardMarkup(KeyboardRow row1, KeyboardRow row2) {
+		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+		List<KeyboardRow> keyboard = new ArrayList<>();
+		keyboard.add(row1);
+		keyboard.add(row2);
+		keyboardMarkup.setKeyboard(keyboard);
+		return keyboardMarkup;
 	}
 
 	private ReplyKeyboardMarkup extractKeyboardMarkup(KeyboardRow row1) {
