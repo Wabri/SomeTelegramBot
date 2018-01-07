@@ -40,24 +40,39 @@ public class QuizBot extends TelegramLongPollingBot {
 			String receivedMessage = update.getMessage().getText();
 			if (masterUsersGame.containUserGame(user)) {
 				UserGame master = masterUsersGame.getUserGame(user);
-				switch (receivedMessage) {
-				case ("nuovadomanda"):
-					break;
-				case ("listadomande"):
-					break;
-				case ("listagiocatori"):
-					managerUsersGame.orderGamersList();
-					SendTextMessage(master.getChat().getId(),
-							"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
-									+ " \n\rLa lista dei giocatori è in ordine decrescente:"
-									+ managerUsersGame.getUsersPointsList());
-					break;
-				case ("nuovomaster"):
-					masterUsersGame.setAcceptNewMaster(true);
-					SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
-					break;
-				default:
-					break;
+				if (!master.isFlagQuestion()) {
+					switch (receivedMessage) {
+					case ("nuovadomanda"):
+						master.setFlagQuestion(true);
+						KeyboardRow row1 = new KeyboardRow();
+						for (int i = 1; i <= 10; i++) {
+							row1.add(Integer.toString(i));
+						}
+						KeyboardRow row2 = new KeyboardRow();
+						for (int i = 11; i <= 20; i++) {
+							row2.add(Integer.toString(i));
+						}
+						SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
+								extractKeyboardMarkup(row1, row2));
+						break;
+					case ("listadomande"):
+						break;
+					case ("listagiocatori"):
+						managerUsersGame.orderGamersList();
+						SendTextMessage(master.getChat().getId(),
+								"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+										+ " \n\rLa lista dei giocatori è in ordine decrescente:"
+										+ managerUsersGame.getUsersPointsList());
+						break;
+					case ("nuovomaster"):
+						masterUsersGame.setAcceptNewMaster(true);
+						SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
+						break;
+					default:
+						break;
+					}
+				} else {
+
 				}
 			} else if (managerUsersGame.containUserGame(user)) {
 

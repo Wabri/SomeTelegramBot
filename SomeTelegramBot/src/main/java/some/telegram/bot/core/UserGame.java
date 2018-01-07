@@ -8,11 +8,13 @@ public class UserGame {
 	private User user;
 	private Chat chat;
 	private int points;
+	private boolean flagQuestion;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
 		this.chat = chat;
 		points = 0;
+		flagQuestion = false;
 	}
 
 	public User getUser() {
@@ -25,6 +27,14 @@ public class UserGame {
 
 	public Chat getChat() {
 		return chat;
+	}
+
+	public boolean isFlagQuestion() {
+		return flagQuestion;
+	}
+
+	public void setFlagQuestion(boolean flagQuestion) {
+		this.flagQuestion = flagQuestion;
 	}
 
 }
