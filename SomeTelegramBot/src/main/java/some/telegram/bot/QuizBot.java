@@ -40,39 +40,87 @@ public class QuizBot extends TelegramLongPollingBot {
 			String receivedMessage = update.getMessage().getText();
 			if (masterUsersGame.containUserGame(user)) {
 				UserGame master = masterUsersGame.getUserGame(user);
-				if (!master.isFlagQuestion()) {
-					switch (receivedMessage) {
-					case ("nuovadomanda"):
-						master.setFlagQuestion(true);
-						KeyboardRow row1 = new KeyboardRow();
-						for (int i = 1; i <= 10; i++) {
-							row1.add(Integer.toString(i));
+				if (!master.isFlagPoints()) {
+					if (!master.isFlagAnswer()) {
+						if (!master.isFlagQuestion()) {
+							switch (receivedMessage) {
+							case ("nuovadomanda"):
+								master.setFlagQuestion(true);
+								KeyboardRow row1 = new KeyboardRow();
+								for (int i = 1; i <= 10; i++) {
+									row1.add(Integer.toString(i));
+								}
+								KeyboardRow row2 = new KeyboardRow();
+								for (int i = 11; i <= 20; i++) {
+									row2.add(Integer.toString(i));
+								}
+								SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
+										extractKeyboardMarkup(row1, row2));
+								break;
+							case ("listadomande"):
+								break;
+							case ("listagiocatori"):
+								managerUsersGame.orderGamersList();
+								SendTextMessage(master.getChat().getId(),
+										"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+												+ " \n\rLa lista dei giocatori è in ordine decrescente:"
+												+ managerUsersGame.getUsersPointsList());
+								break;
+							case ("nuovomaster"):
+								masterUsersGame.setAcceptNewMaster(true);
+								SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
+								break;
+							default:
+								break;
+							}
+						} else {
+							if ((Integer.parseInt(receivedMessage) <= 20) && (Integer.parseInt(receivedMessage) >= 1)) {
+								master.setFlagQuestion(false);
+								master.setSettingQuestion(Integer.parseInt(receivedMessage));
+								KeyboardRow row1 = new KeyboardRow();
+								row1.add("A");
+								row1.add("B");
+								KeyboardRow row2 = new KeyboardRow();
+								row2.add("C");
+								row2.add("D");
+								SendTextMessageWithKeyboard(master.getChat().getId(), "Quale e' la risposta giusta?",
+										extractKeyboardMarkup(row1, row2));
+								master.setFlagAnswer(true);
+							}
 						}
-						KeyboardRow row2 = new KeyboardRow();
-						for (int i = 11; i <= 20; i++) {
-							row2.add(Integer.toString(i));
+					} else {
+						if ((receivedMessage.equals("A")) || (receivedMessage.equals("B"))
+								|| (receivedMessage.equals("C")) || (receivedMessage.equals("D"))) {
+							master.setFlagAnswer(false);
+							master.setSettingRightQuestion(receivedMessage);
+							KeyboardRow row = new KeyboardRow();
+							row.add("1");
+							row.add("2");
+							row.add("3");
+							SendTextMessageWithKeyboard(master.getChat().getId(),
+									"Quale è il punteggio della risposta?", extractKeyboardMarkup(row));
+							master.setFlagPoints(true);
 						}
-						SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
-								extractKeyboardMarkup(row1, row2));
-						break;
-					case ("listadomande"):
-						break;
-					case ("listagiocatori"):
-						managerUsersGame.orderGamersList();
-						SendTextMessage(master.getChat().getId(),
-								"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
-										+ " \n\rLa lista dei giocatori è in ordine decrescente:"
-										+ managerUsersGame.getUsersPointsList());
-						break;
-					case ("nuovomaster"):
-						masterUsersGame.setAcceptNewMaster(true);
-						SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
-						break;
-					default:
-						break;
 					}
 				} else {
-
+					int points = Integer.parseInt(receivedMessage);
+					if (points >= 1 || points <= 3) {
+						masterUsersGame.addNewQuestion(master.getSettingQuestion(), master.getSettingRightQuestion(),
+								points);
+						KeyboardRow row1 = new KeyboardRow();
+						row1.add("nuovadomanda");
+						row1.add("listadomande");
+						KeyboardRow row2 = new KeyboardRow();
+						row2.add("listagiocatori");
+						row2.add("nuovomaster");
+						SendTextMessageWithKeyboard(master.getChat().getId(),
+								"La domanda creata è: \n\r" + masterUsersGame.getListOfQuestion()
+										.get(master.getSettingQuestion()).toString(),
+								extractKeyboardMarkup(row1, row2));
+						master.setSettingQuestion(0);
+						master.setSettingRightQuestion("");
+						master.setFlagPoints(false);
+					}
 				}
 			} else if (managerUsersGame.containUserGame(user)) {
 
