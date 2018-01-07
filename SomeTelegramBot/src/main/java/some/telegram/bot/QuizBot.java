@@ -47,9 +47,14 @@ public class QuizBot extends TelegramLongPollingBot {
 					break;
 				case ("listagiocatori"):
 					managerUsersGame.orderGamersList();
-					SendTextMessage(master.getChat().getId(), managerUsersGame.getUsersPointList());
+					SendTextMessage(master.getChat().getId(),
+							"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+									+ " \n\rLa lista dei giocatori è in ordine decrescente:"
+									+ managerUsersGame.getUsersPointsList());
 					break;
-				case (""):
+				case ("nuovomaster"):
+					masterUsersGame.setAcceptNewMaster(true);
+					SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
 					break;
 				default:
 					break;
@@ -88,7 +93,7 @@ public class QuizBot extends TelegramLongPollingBot {
 						row1.add("nuovadomanda");
 						row1.add("listadomande");
 						KeyboardRow row2 = new KeyboardRow();
-						row2.add("listadeigiocatori");
+						row2.add("listagiocatori");
 						row2.add("nuovomaster");
 						SendTextMessageWithKeyboard(userGame.getChat().getId(), "Sei il nuovo master, cosa vuoi fare?",
 								extractKeyboardMarkup(row1, row2));

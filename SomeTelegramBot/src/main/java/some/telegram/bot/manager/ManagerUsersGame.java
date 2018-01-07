@@ -53,25 +53,25 @@ public class ManagerUsersGame {
 		return null;
 	}
 
-	public String getUsersPointList() {
+	public String getUsersPointsList() {
 		String userPointList = "";
 		for (UserGame userGame : listOfUsers) {
-			if (!userGame.getUser().getUserName().equals(null)) {
-				userPointList.concat("\n\r " + userGame.getUser().getUserName() + " -> " + userGame.getPoints());
-			} else if (!userGame.getUser().getFirstName().equals(null)) {
-				if (!userGame.getUser().getLastName().equals(null)) {
-					userPointList.concat("\n\r " + userGame.getUser().getFirstName() + " "
-							+ userGame.getUser().getLastName() + " -> " + userGame.getPoints());
+			if (!(userGame.getUser().getUserName() == null)) {
+				userPointList += "\n\r " + userGame.getUser().getUserName() + " -> " + userGame.getPoints();
+			} else if (!(userGame.getUser().getFirstName() == null)) {
+				if (!(userGame.getUser().getLastName() == null)) {
+					userPointList += "\n\r " + userGame.getUser().getFirstName() + " "
+							+ userGame.getUser().getLastName() + " -> " + userGame.getPoints();
 				} else {
-					userPointList.concat("\n\r " + userGame.getUser().getFirstName() + " -> " + userGame.getPoints());
+					userPointList += "\n\r " + userGame.getUser().getFirstName() + " -> " + userGame.getPoints();
 				}
-			} else if (!userGame.getUser().getLastName().equals(null)) {
-				userPointList.concat("\n\r " + userGame.getUser().getLastName() + " -> " + userGame.getPoints());
+			} else if (!(userGame.getUser().getLastName() == null)) {
+				userPointList += "\n\r " + userGame.getUser().getLastName() + " -> " + userGame.getPoints();
 			} else {
-				userPointList.concat("\n\r NoNamePlayer" + " -> " + userGame.getPoints());
+				userPointList += "\n\r NoNamePlayer" + " -> " + userGame.getPoints();
 			}
 		}
-		return null;
+		return userPointList;
 	}
 
 }
