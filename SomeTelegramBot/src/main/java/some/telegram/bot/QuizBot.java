@@ -29,8 +29,8 @@ public class QuizBot extends TelegramLongPollingBot {
 		masterUsersGame = new MasterUsersGame(true);
 		this.botUsername = botUsername;
 		this.botToken = botToken;
-		this.accessPassword = String.valueOf((int) (Math.random() * 123456789));
-		System.out.println(accessPassword);
+		this.accessPassword = String.valueOf((int) (99991 * Math.random()));
+		System.out.println("Access Password: " + accessPassword);
 	}
 
 	@Override
@@ -39,12 +39,20 @@ public class QuizBot extends TelegramLongPollingBot {
 			User user = update.getMessage().getFrom();
 			String receivedMessage = update.getMessage().getText();
 			if (masterUsersGame.containUserGame(user)) {
+				UserGame master = masterUsersGame.getUserGame(user);
 				switch (receivedMessage) {
 				case ("nuovadomanda"):
+					break;
 				case ("listadomande"):
+					break;
 				case ("listagiocatori"):
-				case ("ordinagiocatori"):
+					managerUsersGame.orderGamersList();
+					SendTextMessage(master.getChat().getId(), managerUsersGame.getUsersPointList());
+					break;
+				case (""):
+					break;
 				default:
+					break;
 				}
 			} else if (managerUsersGame.containUserGame(user)) {
 
@@ -81,7 +89,7 @@ public class QuizBot extends TelegramLongPollingBot {
 						row1.add("listadomande");
 						KeyboardRow row2 = new KeyboardRow();
 						row2.add("listadeigiocatori");
-						row2.add("ordinagiocatori");
+						row2.add("nuovomaster");
 						SendTextMessageWithKeyboard(userGame.getChat().getId(), "Sei il nuovo master, cosa vuoi fare?",
 								extractKeyboardMarkup(row1, row2));
 					} else {
