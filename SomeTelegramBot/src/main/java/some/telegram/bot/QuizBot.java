@@ -16,21 +16,32 @@ import some.telegram.bot.manager.ManagerUsersGame;
 
 public class QuizBot extends TelegramLongPollingBot {
 
-	private static final String NUOVOMASTER = "NuovoMaster";
-	private static final String LISTAGIOCATORI = "ListaGiocatori";
-	private static final String LISTADOMANDE = "ListaDomande";
-	private static final String NUOVADOMANDA = "NuovaDomanda";
+	private static final String INFO = "Info";
+	private static final String INVIA_MESSAGGIO = "InviaMessaggio";
+	private static final String START_STOP = "StartStop";
+	private static final String SELEZIONA_DOMANDA = "SelezionaDomanda";
+	private static final String ALTRO = "Altro";
+	private static final String BAN_USER = "BanUser";
+	private static final String LISTA_MASTER = "ListaMaster";
+	private static final String NUOVO_MASTER = "NuovoMaster";
+	private static final String LISTA_GIOCATORI = "ListaGiocatori";
+	private static final String LISTA_DOMANDE = "ListaDomande";
+	private static final String NUOVA_DOMANDA = "NuovaDomanda";
+
 	private ManagerUsersGame managerUsersGame;
 	private ManagerUsersGame unknownUserGame;
 	private MasterUsersGame masterUsersGame;
+
 	private String botUsername;
 	private String botToken;
 	private String accessPassword;
+	private boolean otherMasterMenu;
 
 	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
 		unknownUserGame = new ManagerUsersGame();
 		masterUsersGame = new MasterUsersGame(true);
+		otherMasterMenu = true;
 		this.botUsername = botUsername;
 		this.botToken = botToken;
 		this.accessPassword = String.valueOf((int) (99991 * Math.random()));
@@ -62,25 +73,42 @@ public class QuizBot extends TelegramLongPollingBot {
 			if (!master.isFlagAnswer()) {
 				if (!master.isFlagQuestion()) {
 					switch (receivedMessage) {
-					case NUOVADOMANDA:
+					case NUOVA_DOMANDA:
 						master.setFlagQuestion(true);
 						SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
 								extractQuestionKeyboard());
 						break;
-					case LISTADOMANDE:
+					case LISTA_DOMANDE:
 						SendTextMessage(master.getChat().getId(),
 								"Ecco la lista delle domande:\n\r" + masterUsersGame.getStringListOfQuestion());
 						break;
-					case LISTAGIOCATORI:
+					case LISTA_GIOCATORI:
 						managerUsersGame.orderGamersList();
 						SendTextMessage(master.getChat().getId(),
 								"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
 										+ " \n\rLa lista dei giocatori è in ordine decrescente:"
 										+ managerUsersGame.getUsersPointsList());
 						break;
-					case NUOVOMASTER:
+					case NUOVO_MASTER:
 						masterUsersGame.setAcceptNewMaster(true);
 						SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
+						break;
+					case LISTA_MASTER:
+						break;
+					case BAN_USER:
+						break;
+					case SELEZIONA_DOMANDA:
+						break;
+					case START_STOP:
+						break;
+					case INVIA_MESSAGGIO:
+						break;
+					case INFO:
+						break;
+					case ALTRO:
+						this.otherMasterMenu = !otherMasterMenu;
+						SendTextMessageWithKeyboard(master.getChat().getId(), "Queste sono gli altri comandi!",
+								extractMasterKeyboard());
 						break;
 					default:
 						break;
@@ -99,12 +127,8 @@ public class QuizBot extends TelegramLongPollingBot {
 						|| (receivedMessage.equals("D"))) {
 					master.setFlagAnswer(false);
 					master.setSettingRightQuestion(receivedMessage);
-					KeyboardRow row = new KeyboardRow();
-					row.add("1");
-					row.add("2");
-					row.add("3");
 					SendTextMessageWithKeyboard(master.getChat().getId(), "Quale è il punteggio della risposta?",
-							extractKeyboardMarkup(row));
+							extractPointAnswerKeyboard());
 					master.setFlagPoints(true);
 				}
 			}
@@ -183,6 +207,14 @@ public class QuizBot extends TelegramLongPollingBot {
 		}
 	}
 
+	private ReplyKeyboardMarkup extractPointAnswerKeyboard() {
+		KeyboardRow row = new KeyboardRow();
+		row.add("1");
+		row.add("2");
+		row.add("3");
+		return extractKeyboardMarkup(row);
+	}
+
 	private ReplyKeyboardMarkup extractQuestionKeyboard() {
 		KeyboardRow row1 = new KeyboardRow();
 		for (int i = 1; i <= 10; i++) {
@@ -207,12 +239,34 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	private ReplyKeyboardMarkup extractMasterKeyboard() {
 		KeyboardRow row1 = new KeyboardRow();
-		row1.add(NUOVADOMANDA);
-		row1.add(LISTADOMANDE);
 		KeyboardRow row2 = new KeyboardRow();
-		row2.add(LISTAGIOCATORI);
-		row2.add(NUOVOMASTER);
-		return extractKeyboardMarkup(row1, row2);
+		KeyboardRow row3 = new KeyboardRow();
+		if (otherMasterMenu) {
+			row1.add(NUOVA_DOMANDA);
+			row1.add(LISTA_DOMANDE);
+			row2.add(NUOVO_MASTER);
+			row2.add(LISTA_MASTER);
+			row3.add(BAN_USER);
+			row3.add(ALTRO);
+		} else {
+			row1.add(SELEZIONA_DOMANDA);
+			row1.add(START_STOP);
+			row2.add(LISTA_GIOCATORI);
+			row2.add(INVIA_MESSAGGIO);
+			row3.add(INFO);
+			row3.add(ALTRO);
+		}
+		return extractKeyboardMarkup(row1, row2, row3);
+	}
+
+	private ReplyKeyboardMarkup extractKeyboardMarkup(KeyboardRow row1, KeyboardRow row2, KeyboardRow row3) {
+		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+		List<KeyboardRow> keyboard = new ArrayList<>();
+		keyboard.add(row1);
+		keyboard.add(row2);
+		keyboard.add(row3);
+		keyboardMarkup.setKeyboard(keyboard);
+		return keyboardMarkup;
 	}
 
 	private ReplyKeyboardMarkup extractKeyboardMarkup(KeyboardRow row1, KeyboardRow row2) {
