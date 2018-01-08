@@ -107,7 +107,7 @@ public class QuizBot extends TelegramLongPollingBot {
 						break;
 					case ALTRO:
 						this.otherMasterMenu = !otherMasterMenu;
-						SendTextMessageWithKeyboard(master.getChat().getId(), "Queste sono gli altri comandi!",
+						SendTextMessageWithKeyboard(master.getChat().getId(), "Questi sono gli altri comandi!",
 								extractMasterKeyboard());
 						break;
 					default:
