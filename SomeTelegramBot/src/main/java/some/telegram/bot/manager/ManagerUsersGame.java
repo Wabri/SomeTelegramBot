@@ -74,4 +74,13 @@ public class ManagerUsersGame {
 		return userPointList;
 	}
 
+	public UserGame getUserGame(String receivedMessage) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getUser().getUserName().equals(receivedMessage)) {
+				return userGame;
+			}
+		}
+		return null;
+	}
+
 }
