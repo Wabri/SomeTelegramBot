@@ -94,6 +94,9 @@ public class QuizBot extends TelegramLongPollingBot {
 						SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
 						break;
 					case LISTA_MASTER:
+						SendTextMessage(master.getChat().getId(),
+								"Il numero dei master è: " + managerUsersGame.getListOfUsers().size()
+										+ " \n\rLa lista dei master:" + managerUsersGame.getUsersPointsList());
 						break;
 					case BAN_USER:
 						break;
