@@ -143,6 +143,10 @@ public class QuizBot extends TelegramLongPollingBot {
 											SendTextMessageWithKeyboard(master.getChat().getId(),
 													"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
 													extractKeyboardMarkup(row));
+											for (UserGame userGame : managerUsersGame.getListOfUsers()) {
+												SendTextMessage(userGame.getChat().getId(),
+														"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+											}
 										} else {
 											SendTextMessage(master.getChat().getId(),
 													"Devi ancora scegliere la domanda!");
@@ -264,7 +268,7 @@ public class QuizBot extends TelegramLongPollingBot {
 				}
 			} else {
 				if ((Integer.parseInt(receivedMessage) <= 30) && (Integer.parseInt(receivedMessage) >= 1)) {
-					questionSelected = masterUsersGame.getListOfQuestion().get((Integer.parseInt(receivedMessage)));
+					questionSelected = masterUsersGame.getQuestion((Integer.parseInt(receivedMessage)));
 					SendTextMessageWithKeyboard(master.getChat().getId(),
 							"Hai selezionato la domanda:\n\r" + questionSelected.toString(),
 							extractMasterKeyboard(master.isOtherMasterMenu()));
@@ -274,11 +278,12 @@ public class QuizBot extends TelegramLongPollingBot {
 		} else {
 			if (receivedMessage.equals("Stop!")) {
 				SendTextMessageWithKeyboard(master.getChat().getId(),
-						"Hai stoppato la possibilità di rispondere, le risposte che sono state ricevute sono: "
+						"Hai stoppato la possibilità di rispondere, il numero delle risposte ricevute sono: "
 								+ numberOfAnswer,
 						extractMasterKeyboard(master.isOtherMasterMenu()));
 				numberOfAnswer = 0;
 				questionSelected = null;
+				master.setStartStop(false);
 			}
 		}
 	}

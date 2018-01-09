@@ -72,4 +72,15 @@ public class MasterUsersGame extends ManagerUsersGame {
 		return userPointList;
 	}
 
+	public Question getQuestion(int i) {
+		if (i >= 1 || i <= 30) {
+			for (Question question : listOfQuestion) {
+				if (question.getQuestion() == i) {
+					return question;
+				}
+			}
+		}
+		return null;
+	}
+
 }
