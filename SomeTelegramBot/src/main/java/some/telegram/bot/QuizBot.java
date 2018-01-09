@@ -96,196 +96,223 @@ public class QuizBot extends TelegramLongPollingBot {
 						if (!master.isFlagPoints()) {
 							if (!master.isFlagAnswer()) {
 								if (!master.isFlagQuestion()) {
-									switch (receivedMessage) {
-									case NUOVA_DOMANDA:
-										master.setFlagQuestion(true);
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Quale domanda vuoi impostare?", extractQuestionKeyboard());
-										break;
-									case LISTA_DOMANDE:
-										SendTextMessage(master.getChat().getId(), "Ecco la lista delle domande:\n\r"
-												+ masterUsersGame.getStringListOfQuestion());
-										break;
-									case LISTA_GIOCATORI:
-										managerUsersGame.orderGamersList();
-										SendTextMessage(master.getChat().getId(),
-												"Il numero dei partecipanti è: "
-														+ managerUsersGame.getListOfUsers().size()
-														+ " \n\rLa lista dei giocatori è in ordine decrescente:"
-														+ managerUsersGame.getUsersPointsList());
-										break;
-									case NUOVO_MASTER:
-										masterUsersGame.setAcceptNewMaster(true);
-										SendTextMessage(master.getChat().getId(),
-												"Può essere accettato un nuovo master");
-										break;
-									case LISTA_MASTER:
-										SendTextMessage(master.getChat().getId(),
-												"Il numero dei master è: " + masterUsersGame.getListOfUsers().size()
-														+ " \n\rLa lista dei master:"
-														+ masterUsersGame.getMasterInfoList());
-										break;
-									case BAN_USER:
-										master.setWantBan(true);
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Inserisci lo username del giocatore da bannare!",
-												extractDeleteKeyboard());
-										break;
-									case SELEZIONA_DOMANDA:
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Quale domanda vuoi selezionare?", extractQuestionKeyboard());
-										master.setGetSelectedQuestion(true);
-										break;
-									case START:
-										if (questionSelected != null) {
-											master.setStartStop(true);
-											KeyboardRow row = new KeyboardRow();
-											row.add("Stop!");
-											SendTextMessageWithKeyboard(master.getChat().getId(),
-													"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
-													extractKeyboardMarkup(row));
-											for (UserGame userGame : managerUsersGame.getListOfUsers()) {
-												SendTextMessage(userGame.getChat().getId(),
-														"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
-											}
-										} else {
-											SendTextMessage(master.getChat().getId(),
-													"Devi ancora scegliere la domanda!");
-										}
-										break;
-									case INVIA_MESSAGGIO:
-										master.setSendMessage(true);
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Inserisci il messaggio da inviare!", extractDeleteKeyboard());
-										break;
-									case INFO:
-										SendTextMessage(master.getChat().getId(), INFO_MESSAGE);
-										break;
-									case ALTRO:
-										master.setOtherMasterMenu(!master.isOtherMasterMenu());
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Questi sono gli altri comandi!",
-												extractMasterKeyboard(master.isOtherMasterMenu()));
-										break;
-									default:
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Usa i pulsanti, non so come aiutarti altrimenti!",
-												extractMasterKeyboard(master.isOtherMasterMenu()));
-										break;
-									}
+									masterParserMessage(receivedMessage, master);
 								} else {
-									if ((Integer.parseInt(receivedMessage) <= 30)
-											&& (Integer.parseInt(receivedMessage) >= 1)) {
-										master.setFlagQuestion(false);
-										master.setSettingQuestion(Integer.parseInt(receivedMessage));
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Quale e' la risposta giusta?", extractAnswerKeyboard());
-										master.setFlagAnswer(true);
-									}
+									masterNewQuestionRequestQuestion(receivedMessage, master);
 								}
 							} else {
-								if ((receivedMessage.equals("A")) || (receivedMessage.equals("B"))
-										|| (receivedMessage.equals("C")) || (receivedMessage.equals("D"))) {
-									master.setFlagAnswer(false);
-									master.setSettingRightQuestion(receivedMessage);
-									SendTextMessageWithKeyboard(master.getChat().getId(),
-											"Quale è il punteggio della risposta?", extractPointAnswerKeyboard());
-									master.setFlagPoints(true);
-								}
+								masterNewAnswerRequestQuestio(receivedMessage, master);
 							}
 						} else {
-							int points = Integer.parseInt(receivedMessage);
-							if (points >= 1 || points <= 3) {
-								masterUsersGame.addNewQuestion(master.getSettingQuestion(),
-										master.getSettingRightQuestion(), points);
-								SendTextMessageWithKeyboard(master.getChat().getId(),
-										"La domanda creata è: \n\r" + masterUsersGame.getListOfQuestion()
-												.get(master.getSettingQuestion() - 1).toString(),
-										extractMasterKeyboard(master.isOtherMasterMenu()));
-								master.setSettingQuestion(0);
-								master.setSettingRightQuestion("");
-								master.setFlagPoints(false);
-							}
+							masterNewPointRequestQuestion(receivedMessage, master);
 						}
 					} else {
-						if (!receivedMessage.equals("/annulla")) {
-							if (!receivedMessage.equals(master.getUser().getUserName())) {
-								UserGame userBan = managerUsersGame.getUserGame(receivedMessage);
-								if (userBan == null) {
-									userBan = unknownUsersGame.getUserGame(receivedMessage);
-									if (userBan == null) {
-										userBan = masterUsersGame.getUserGame(receivedMessage);
-										if (userBan == null) {
-											SendTextMessageWithKeyboard(master.getChat().getId(),
-													"Non esiste nessuno con questo nome",
-													extractMasterKeyboard(master.isOtherMasterMenu()));
-										} else {
-											masterUsersGame.removeUserGame(userBan);
-											SendTextMessageWithKeyboard(master.getChat().getId(),
-													"Il master " + userBan.getUser().getUserName()
-															+ " è stato bannato!",
-													extractMasterKeyboard(master.isOtherMasterMenu()));
-										}
-									} else {
-										unknownUsersGame.removeUserGame(userBan);
-										SendTextMessageWithKeyboard(master.getChat().getId(),
-												"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
-												extractMasterKeyboard(master.isOtherMasterMenu()));
-									}
-								} else {
-									managerUsersGame.removeUserGame(userBan);
-									SendTextMessageWithKeyboard(master.getChat().getId(),
-											"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
-											extractMasterKeyboard(master.isOtherMasterMenu()));
-								}
-								if (userBan != null) {
-									SendTextMessageWithKeyboard(userBan.getChat().getId(),
-											"Mi dispiace ma sei stato bannato!", extractStartKeyboard());
-								}
-							} else {
-								SendTextMessageWithKeyboard(master.getChat().getId(), "Non puoi bannare te stesso!",
-										extractMasterKeyboard(master.isOtherMasterMenu()));
-							}
-						} else {
-							SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di ban!",
-									extractMasterKeyboard(master.isOtherMasterMenu()));
-						}
-						master.setWantBan(false);
+						masterRequestBan(receivedMessage, master);
 					}
 				} else {
-					if (!receivedMessage.equals("/annulla")) {
-						for (UserGame receiver : managerUsersGame.getListOfUsers()) {
-							SendTextMessage(receiver.getChat().getId(), receivedMessage);
-						}
-						SendTextMessageWithKeyboard(master.getChat().getId(),
-								"Il messaggio inviato è: " + receivedMessage,
-								extractMasterKeyboard(master.isOtherMasterMenu()));
-					} else {
-						SendTextMessageWithKeyboard(master.getChat().getId(),
-								"Hai annullato il processo di invio messaggi!",
-								extractMasterKeyboard(master.isOtherMasterMenu()));
-					}
-					master.setSendMessage(false);
+					masterRequestSendMessage(receivedMessage, master);
 				}
 			} else {
-				if ((Integer.parseInt(receivedMessage) <= 30) && (Integer.parseInt(receivedMessage) >= 1)) {
-					questionSelected = masterUsersGame.getQuestion((Integer.parseInt(receivedMessage)));
-					SendTextMessageWithKeyboard(master.getChat().getId(),
-							"Hai selezionato la domanda:\n\r" + questionSelected.toString(),
-							extractMasterKeyboard(master.isOtherMasterMenu()));
-					master.setGetSelectedQuestion(false);
-				}
+				masterRequestSelectQuestion(receivedMessage, master);
 			}
 		} else {
-			if (receivedMessage.equals("Stop!")) {
-				SendTextMessageWithKeyboard(master.getChat().getId(),
-						"Hai stoppato la possibilità di rispondere, il numero delle risposte ricevute sono: "
-								+ numberOfAnswer,
-						extractMasterKeyboard(master.isOtherMasterMenu()));
-				numberOfAnswer = 0;
-				questionSelected = null;
-				master.setStartStop(false);
+			masterRequestStartGame(receivedMessage, master);
+		}
+	}
+
+	private void masterRequestStartGame(String receivedMessage, UserGame master) {
+		if (receivedMessage.equals("Stop!")) {
+			SendTextMessageWithKeyboard(master.getChat().getId(),
+					"Hai stoppato la possibilità di rispondere, il numero delle risposte ricevute sono: "
+							+ numberOfAnswer,
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+			numberOfAnswer = 0;
+			questionSelected = null;
+			master.setStartStop(false);
+		} else {
+			SendTextMessage(master.getChat().getId(), "Per stoppare devi inviare Stop!");
+		}
+	}
+
+	private void masterRequestSelectQuestion(String receivedMessage, UserGame master) {
+		if ((Integer.parseInt(receivedMessage) <= 30) && (Integer.parseInt(receivedMessage) >= 1)) {
+			questionSelected = masterUsersGame.getQuestion((Integer.parseInt(receivedMessage)));
+			SendTextMessageWithKeyboard(master.getChat().getId(),
+					"Hai selezionato la domanda:\n\r" + questionSelected.toString(),
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+			master.setGetSelectedQuestion(false);
+		}
+	}
+
+	private void masterRequestSendMessage(String receivedMessage, UserGame master) {
+		if (!receivedMessage.equals("/annulla")) {
+			for (UserGame receiver : managerUsersGame.getListOfUsers()) {
+				SendTextMessage(receiver.getChat().getId(), receivedMessage);
 			}
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Il messaggio inviato è: " + receivedMessage,
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+		} else {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di invio messaggi!",
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+		}
+		master.setSendMessage(false);
+	}
+
+	private void masterRequestBan(String receivedMessage, UserGame master) {
+		if (!receivedMessage.equals("/annulla")) {
+			if (!receivedMessage.equals(master.getUser().getUserName())) {
+				UserGame userBan = managerUsersGame.getUserGame(receivedMessage);
+				if (userBan == null) {
+					userBan = unknownUsersGame.getUserGame(receivedMessage);
+					if (userBan == null) {
+						userBan = masterUsersGame.getUserGame(receivedMessage);
+						if (userBan == null) {
+							SendTextMessageWithKeyboard(master.getChat().getId(), "Non esiste nessuno con questo nome",
+									extractMasterKeyboard(master.isOtherMasterMenu()));
+						} else {
+							masterUsersGame.removeUserGame(userBan);
+							SendTextMessageWithKeyboard(master.getChat().getId(),
+									"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
+									extractMasterKeyboard(master.isOtherMasterMenu()));
+						}
+					} else {
+						unknownUsersGame.removeUserGame(userBan);
+						SendTextMessageWithKeyboard(master.getChat().getId(),
+								"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
+								extractMasterKeyboard(master.isOtherMasterMenu()));
+					}
+				} else {
+					managerUsersGame.removeUserGame(userBan);
+					SendTextMessageWithKeyboard(master.getChat().getId(),
+							"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
+							extractMasterKeyboard(master.isOtherMasterMenu()));
+				}
+				if (userBan != null) {
+					SendTextMessageWithKeyboard(userBan.getChat().getId(), "Mi dispiace ma sei stato bannato!",
+							extractStartKeyboard());
+				}
+			} else {
+				SendTextMessageWithKeyboard(master.getChat().getId(), "Non puoi bannare te stesso!",
+						extractMasterKeyboard(master.isOtherMasterMenu()));
+			}
+		} else {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di ban!",
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+		}
+		master.setWantBan(false);
+	}
+
+	private void masterNewPointRequestQuestion(String receivedMessage, UserGame master) {
+		int points = Integer.parseInt(receivedMessage);
+		if (points >= 1 || points <= 3) {
+			masterUsersGame.addNewQuestion(master.getSettingQuestion(), master.getSettingRightQuestion(), points);
+			SendTextMessageWithKeyboard(master.getChat().getId(),
+					"La domanda creata è: \n\r"
+							+ masterUsersGame.getListOfQuestion().get(master.getSettingQuestion() - 1).toString(),
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+			master.setSettingQuestion(0);
+			master.setSettingRightQuestion("");
+			master.setFlagPoints(false);
+		} else {
+			SendTextMessage(master.getChat().getId(), "Devi inserire un punteggio 1 2 o 3!");
+		}
+	}
+
+	private void masterNewAnswerRequestQuestio(String receivedMessage, UserGame master) {
+		if ((receivedMessage.equals("A")) || (receivedMessage.equals("B")) || (receivedMessage.equals("C"))
+				|| (receivedMessage.equals("D"))) {
+			master.setFlagAnswer(false);
+			master.setSettingRightQuestion(receivedMessage);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Quale è il punteggio della risposta?",
+					extractPointAnswerKeyboard());
+			master.setFlagPoints(true);
+		} else {
+			SendTextMessage(master.getChat().getId(), "Devi inserire una risposta A B C o D!");
+		}
+	}
+
+	private void masterNewQuestionRequestQuestion(String receivedMessage, UserGame master) {
+		if ((Integer.parseInt(receivedMessage) <= 30) && (Integer.parseInt(receivedMessage) >= 1)) {
+			master.setFlagQuestion(false);
+			master.setSettingQuestion(Integer.parseInt(receivedMessage));
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Quale e' la risposta giusta?",
+					extractAnswerKeyboard());
+			master.setFlagAnswer(true);
+		} else {
+			SendTextMessage(master.getChat().getId(), "Devi selezionare una domanda tra la 1 e la 30!");
+		}
+	}
+
+	private void masterParserMessage(String receivedMessage, UserGame master) {
+		switch (receivedMessage) {
+		case NUOVA_DOMANDA:
+			master.setFlagQuestion(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
+					extractQuestionKeyboard());
+			break;
+		case LISTA_DOMANDE:
+			SendTextMessage(master.getChat().getId(),
+					"Ecco la lista delle domande:\n\r" + masterUsersGame.getStringListOfQuestion());
+			break;
+		case LISTA_GIOCATORI:
+			managerUsersGame.orderGamersList();
+			SendTextMessage(master.getChat().getId(),
+					"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+							+ " \n\rLa lista dei giocatori è in ordine decrescente:"
+							+ managerUsersGame.getUsersPointsList());
+			break;
+		case NUOVO_MASTER:
+			masterUsersGame.setAcceptNewMaster(true);
+			SendTextMessage(master.getChat().getId(), "Può essere accettato un nuovo master");
+			break;
+		case LISTA_MASTER:
+			SendTextMessage(master.getChat().getId(),
+					"Il numero dei master è: " + masterUsersGame.getListOfUsers().size() + " \n\rLa lista dei master:"
+							+ masterUsersGame.getMasterInfoList());
+			break;
+		case BAN_USER:
+			master.setWantBan(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci lo username del giocatore da bannare!",
+					extractDeleteKeyboard());
+			break;
+		case SELEZIONA_DOMANDA:
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi selezionare?",
+					extractQuestionKeyboard());
+			master.setGetSelectedQuestion(true);
+			break;
+		case START:
+			if (questionSelected != null) {
+				master.setStartStop(true);
+				KeyboardRow row = new KeyboardRow();
+				row.add("Stop!");
+				SendTextMessageWithKeyboard(master.getChat().getId(),
+						"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
+						extractKeyboardMarkup(row));
+				for (UserGame userGame : managerUsersGame.getListOfUsers()) {
+					SendTextMessage(userGame.getChat().getId(),
+							"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+				}
+			} else {
+				SendTextMessage(master.getChat().getId(), "Devi ancora scegliere la domanda!");
+			}
+			break;
+		case INVIA_MESSAGGIO:
+			master.setSendMessage(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci il messaggio da inviare!",
+					extractDeleteKeyboard());
+			break;
+		case INFO:
+			SendTextMessage(master.getChat().getId(), INFO_MESSAGE);
+			break;
+		case ALTRO:
+			master.setOtherMasterMenu(!master.isOtherMasterMenu());
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Questi sono gli altri comandi!",
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+			break;
+		default:
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Usa i pulsanti, non so come aiutarti altrimenti!",
+					extractMasterKeyboard(master.isOtherMasterMenu()));
+			break;
 		}
 	}
 
