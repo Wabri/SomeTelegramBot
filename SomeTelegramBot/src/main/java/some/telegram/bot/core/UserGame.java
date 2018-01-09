@@ -17,6 +17,7 @@ public class UserGame {
 	private boolean sendMessage;
 	private boolean otherMasterMenu;
 	private boolean getSelectedQuestion;
+	private boolean startStop;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -29,6 +30,7 @@ public class UserGame {
 		sendMessage = false;
 		otherMasterMenu = true;
 		getSelectedQuestion = false;
+		startStop = false;
 		settingQuestion = 0;
 		settingRightQuestion = "";
 	}
@@ -115,6 +117,14 @@ public class UserGame {
 
 	public void setGetSelectedQuestion(boolean getSelectedQuestion) {
 		this.getSelectedQuestion = getSelectedQuestion;
+	}
+
+	public void setStartStop(boolean startStop) {
+		this.startStop = startStop;
+	}
+
+	public boolean isStartStop() {
+		return startStop;
 	}
 
 }
