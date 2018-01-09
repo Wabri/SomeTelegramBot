@@ -14,6 +14,7 @@ public class UserGame {
 	private int settingQuestion;
 	private String settingRightQuestion;
 	private boolean wantBan;
+	private boolean sendMessage;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -23,6 +24,7 @@ public class UserGame {
 		flagAnswer = false;
 		flagPoints = false;
 		wantBan = false;
+		sendMessage = false;
 		settingQuestion = 0;
 		settingRightQuestion = "";
 	}
@@ -85,6 +87,14 @@ public class UserGame {
 
 	public boolean isWantBan() {
 		return wantBan;
+	}
+
+	public void setSendMessage(boolean sendMessage) {
+		this.sendMessage = sendMessage;
+	}
+
+	public boolean isSendMessage() {
+		return sendMessage;
 	}
 
 }

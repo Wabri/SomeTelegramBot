@@ -15,7 +15,7 @@ public class MasterUsersGame extends ManagerUsersGame {
 		super();
 		this.acceptNewMaster = acceptNewMaster;
 		listOfQuestion = new ArrayList<Question>();
-		for (int i = 1; i <= 20; i++) {
+		for (int i = 1; i <= 30; i++) {
 			listOfQuestion.add(new Question(i, "", 0));
 		}
 	}
