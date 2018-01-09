@@ -68,10 +68,19 @@ public class ManagerUsersGame {
 			} else if (!(userGame.getUser().getLastName() == null)) {
 				userPointList += "\n\r " + userGame.getUser().getLastName() + " -> " + userGame.getPoints();
 			} else {
-				userPointList += "\n\r NoNamePlayer" + " -> " + userGame.getPoints();
+				userPointList += userGame.getChat().getId() + " -> " + userGame.getPoints();
 			}
 		}
 		return userPointList;
+	}
+
+	public UserGame getUserGame(String receivedMessage) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getUser().getUserName().equals(receivedMessage)) {
+				return userGame;
+			}
+		}
+		return null;
 	}
 
 }
