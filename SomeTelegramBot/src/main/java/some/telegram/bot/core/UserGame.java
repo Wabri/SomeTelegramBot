@@ -15,6 +15,8 @@ public class UserGame {
 	private String settingRightQuestion;
 	private boolean wantBan;
 	private boolean sendMessage;
+	private boolean otherMasterMenu;
+	private boolean getSelectedQuestion;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -25,6 +27,8 @@ public class UserGame {
 		flagPoints = false;
 		wantBan = false;
 		sendMessage = false;
+		otherMasterMenu = true;
+		getSelectedQuestion = false;
 		settingQuestion = 0;
 		settingRightQuestion = "";
 	}
@@ -95,6 +99,22 @@ public class UserGame {
 
 	public boolean isSendMessage() {
 		return sendMessage;
+	}
+
+	public boolean isOtherMasterMenu() {
+		return otherMasterMenu;
+	}
+
+	public void setOtherMasterMenu(boolean otherMasterMenu) {
+		this.otherMasterMenu = otherMasterMenu;
+	}
+
+	public boolean isGetSelectedQuestion() {
+		return getSelectedQuestion;
+	}
+
+	public void setGetSelectedQuestion(boolean getSelectedQuestion) {
+		this.getSelectedQuestion = getSelectedQuestion;
 	}
 
 }
