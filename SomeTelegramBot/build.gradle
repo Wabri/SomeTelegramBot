@@ -1,10 +1,22 @@
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
 
+version = '1.0'
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Telegram Bot Series Night',
+        	'Implementation-Version': version,
+        	'Main-Class': 'Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
 
 dependencies {
