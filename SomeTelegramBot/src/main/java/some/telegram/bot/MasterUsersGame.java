@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import some.telegram.bot.core.Question;
+import some.telegram.bot.core.UserGame;
 import some.telegram.bot.manager.ManagerUsersGame;
 
 public class MasterUsersGame extends ManagerUsersGame {
@@ -48,6 +49,27 @@ public class MasterUsersGame extends ManagerUsersGame {
 			questionList += question.limitedToString() + "\n\r";
 		}
 		return questionList;
+	}
+
+	public String getMasterInfoList() {
+		String userPointList = "";
+		for (UserGame userGame : getListOfUsers()) {
+			if (!(userGame.getUser().getUserName() == null)) {
+				userPointList += "\n\r " + userGame.getUser().getUserName();
+			} else if (!(userGame.getUser().getFirstName() == null)) {
+				if (!(userGame.getUser().getLastName() == null)) {
+					userPointList += "\n\r " + userGame.getUser().getFirstName() + " "
+							+ userGame.getUser().getLastName();
+				} else {
+					userPointList += "\n\r " + userGame.getUser().getFirstName();
+				}
+			} else if (!(userGame.getUser().getLastName() == null)) {
+				userPointList += "\n\r " + userGame.getUser().getLastName();
+			} else {
+				userPointList += "\n\r NoNamePlayer";
+			}
+		}
+		return userPointList;
 	}
 
 }

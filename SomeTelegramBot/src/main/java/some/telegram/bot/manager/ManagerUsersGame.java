@@ -68,7 +68,7 @@ public class ManagerUsersGame {
 			} else if (!(userGame.getUser().getLastName() == null)) {
 				userPointList += "\n\r " + userGame.getUser().getLastName() + " -> " + userGame.getPoints();
 			} else {
-				userPointList += "\n\r NoNamePlayer" + " -> " + userGame.getPoints();
+				userPointList += userGame.getChat().getId() + " -> " + userGame.getPoints();
 			}
 		}
 		return userPointList;
