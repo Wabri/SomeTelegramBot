@@ -14,6 +14,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import some.telegram.bot.core.Question;
 import some.telegram.bot.core.UserGame;
 import some.telegram.bot.manager.ManagerUsersGame;
+import some.telegram.bot.manager.MasterUsersGame;
 
 public class QuizBot extends TelegramLongPollingBot {
 

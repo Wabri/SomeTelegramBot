@@ -1,11 +1,10 @@
-package some.telegram.bot;
+package some.telegram.bot.manager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import some.telegram.bot.core.Question;
 import some.telegram.bot.core.UserGame;
-import some.telegram.bot.manager.ManagerUsersGame;
 
 public class MasterUsersGame extends ManagerUsersGame {
 
