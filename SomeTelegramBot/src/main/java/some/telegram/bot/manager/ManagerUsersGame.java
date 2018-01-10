@@ -56,17 +56,18 @@ public class ManagerUsersGame {
 	public String getUsersPointsList() {
 		String userPointList = "";
 		for (UserGame userGame : listOfUsers) {
+			userPointList += "\n\r " + userGame.getChat().getId() + " ";
 			if (!(userGame.getUser().getUserName() == null)) {
-				userPointList += "\n\r " + userGame.getUser().getUserName() + " -> " + userGame.getPoints();
+				userPointList += userGame.getUser().getUserName() + " -> " + userGame.getPoints();
 			} else if (!(userGame.getUser().getFirstName() == null)) {
 				if (!(userGame.getUser().getLastName() == null)) {
-					userPointList += "\n\r " + userGame.getUser().getFirstName() + " "
-							+ userGame.getUser().getLastName() + " -> " + userGame.getPoints();
+					userPointList += userGame.getUser().getFirstName() + " " + userGame.getUser().getLastName() + " -> "
+							+ userGame.getPoints();
 				} else {
-					userPointList += "\n\r " + userGame.getUser().getFirstName() + " -> " + userGame.getPoints();
+					userPointList += userGame.getUser().getFirstName() + " -> " + userGame.getPoints();
 				}
 			} else if (!(userGame.getUser().getLastName() == null)) {
-				userPointList += "\n\r " + userGame.getUser().getLastName() + " -> " + userGame.getPoints();
+				userPointList += userGame.getUser().getLastName() + " -> " + userGame.getPoints();
 			} else {
 				userPointList += userGame.getChat().getId() + " -> " + userGame.getPoints();
 			}
@@ -77,6 +78,15 @@ public class ManagerUsersGame {
 	public UserGame getUserGame(String receivedMessage) {
 		for (UserGame userGame : listOfUsers) {
 			if (userGame.getUser().getUserName().equals(receivedMessage)) {
+				return userGame;
+			}
+		}
+		return null;
+	}
+
+	public UserGame getUserGame(Long chatIdToBan) {
+		for (UserGame userGame : listOfUsers) {
+			if (userGame.getChat().getId().equals(chatIdToBan)) {
 				return userGame;
 			}
 		}
