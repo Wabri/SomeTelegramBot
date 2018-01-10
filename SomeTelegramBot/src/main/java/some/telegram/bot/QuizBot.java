@@ -60,6 +60,7 @@ public class QuizBot extends TelegramLongPollingBot {
 	private Question questionSelected;
 	private int numberOfAnswer;
 	private boolean canAnswer;
+	private boolean alreadyStart;
 
 	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
@@ -70,6 +71,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		this.accessPassword = String.valueOf((int) (99991 * Math.random()));
 		questionSelected = null;
 		canAnswer = false;
+		alreadyStart = false;
 		numberOfAnswer = 0;
 		System.out.println("Access Password: " + accessPassword);
 	}
@@ -161,6 +163,7 @@ public class QuizBot extends TelegramLongPollingBot {
 				userGame.setAlreadyAnswerToQuestion(false);
 			}
 			master.setStartStop(false);
+			alreadyStart = false;
 		} else {
 			SendTextMessage(master.getChat().getId(), "Per stoppare devi inviare Stop!");
 		}
@@ -314,20 +317,25 @@ public class QuizBot extends TelegramLongPollingBot {
 			master.setGetSelectedQuestion(true);
 			break;
 		case START:
-			if (questionSelected != null) {
-				master.setStartStop(true);
-				KeyboardRow row = new KeyboardRow();
-				row.add("Stop!");
-				SendTextMessageWithKeyboard(master.getChat().getId(),
-						"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
-						extractKeyboardMarkup(row));
-				canAnswer = true;
-				for (UserGame userGame : managerUsersGame.getListOfUsers()) {
-					SendTextMessage(userGame.getChat().getId(),
-							"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+			if (!alreadyStart) {
+				if (questionSelected != null) {
+					alreadyStart = true;
+					master.setStartStop(true);
+					KeyboardRow row = new KeyboardRow();
+					row.add("Stop!");
+					SendTextMessageWithKeyboard(master.getChat().getId(),
+							"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
+							extractKeyboardMarkup(row));
+					canAnswer = true;
+					for (UserGame userGame : managerUsersGame.getListOfUsers()) {
+						SendTextMessage(userGame.getChat().getId(),
+								"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+					}
+				} else {
+					SendTextMessage(master.getChat().getId(), "Devi ancora scegliere la domanda!");
 				}
 			} else {
-				SendTextMessage(master.getChat().getId(), "Devi ancora scegliere la domanda!");
+				SendTextMessage(master.getChat().getId(), "Già un altro master ha abilitato le risposte!");
 			}
 			break;
 		case INVIA_MESSAGGIO:
@@ -540,8 +548,8 @@ public class QuizBot extends TelegramLongPollingBot {
 		Date date = new Date();
 		System.out.println(dateFormat.format(date));
 		System.out.println("\n\r Nuovo " + type + " con fistname: " + firstName + ", lastname: " + lastName
-				+ " username: " + userName + " chatId: " + chatId + " \n\rIl numero di " + type + " registrati sono: "
-				+ numberOfType);
+				+ ", username: " + userName + ", chatId: " + chatId + " \n\r Il numero di " + type
+				+ " registrati sono: " + numberOfType);
 	}
 
 }
