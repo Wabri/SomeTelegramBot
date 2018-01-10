@@ -3,6 +3,10 @@ package some.telegram.bot;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.User;
@@ -56,6 +60,7 @@ public class QuizBot extends TelegramLongPollingBot {
 	private Question questionSelected;
 	private int numberOfAnswer;
 	private boolean canAnswer;
+	private boolean alreadyStart;
 
 	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
@@ -66,6 +71,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		this.accessPassword = String.valueOf((int) (99991 * Math.random()));
 		questionSelected = null;
 		canAnswer = false;
+		alreadyStart = false;
 		numberOfAnswer = 0;
 		System.out.println("Access Password: " + accessPassword);
 	}
@@ -78,30 +84,33 @@ public class QuizBot extends TelegramLongPollingBot {
 			if (masterUsersGame.containUserGame(user)) {
 				masterUserMenu(user, receivedMessage);
 			} else if (managerUsersGame.containUserGame(user)) {
-				if (canAnswer) {
-					UserGame gamer = managerUsersGame.getUserGame(user);
-					if (!gamer.isAlreadyAnswerToQuestion()) {
-						if (receivedMessage.equals("A") || receivedMessage.equals("B") || receivedMessage.equals("C")
-								|| receivedMessage.equals("D")) {
-							if (receivedMessage.equals(questionSelected.getRightAnswer())) {
-								gamer.addPoints(questionSelected.getPoints());
-							}
-							gamer.setAlreadyAnswerToQuestion(true);
-							numberOfAnswer += 1;
-						} else {
-							SendTextMessageWithKeyboard(gamer.getChat().getId(), "Usa la tastiera!",
-									extractAnswerKeyboard());
-						}
-					}
-
-				}
+				playerUserMenu(user, receivedMessage);
 			} else if (!unknownUsersGame.containUserGame(user)) {
-				newUserMenu(update, user, receivedMessage);
+				unknownUserMenu(update, user, receivedMessage);
 			} else if (unknownUsersGame.containUserGame(user)) {
-				unknownUserMenu(user, receivedMessage);
+				newUserMenu(user, receivedMessage);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void playerUserMenu(User user, String receivedMessage) {
+		if (canAnswer) {
+			UserGame gamer = managerUsersGame.getUserGame(user);
+			if (!gamer.isAlreadyAnswerToQuestion()) {
+				if (receivedMessage.equals("A") || receivedMessage.equals("B") || receivedMessage.equals("C")
+						|| receivedMessage.equals("D")) {
+					if (receivedMessage.equals(questionSelected.getRightAnswer())) {
+						gamer.addPoints(questionSelected.getPoints());
+					}
+					gamer.setAlreadyAnswerToQuestion(true);
+					numberOfAnswer += 1;
+				} else {
+					SendTextMessageWithKeyboard(gamer.getChat().getId(), "Usa la tastiera!", extractAnswerKeyboard());
+				}
+			}
+
 		}
 	}
 
@@ -154,6 +163,7 @@ public class QuizBot extends TelegramLongPollingBot {
 				userGame.setAlreadyAnswerToQuestion(false);
 			}
 			master.setStartStop(false);
+			alreadyStart = false;
 		} else {
 			SendTextMessage(master.getChat().getId(), "Per stoppare devi inviare Stop!");
 		}
@@ -307,20 +317,25 @@ public class QuizBot extends TelegramLongPollingBot {
 			master.setGetSelectedQuestion(true);
 			break;
 		case START:
-			if (questionSelected != null) {
-				master.setStartStop(true);
-				KeyboardRow row = new KeyboardRow();
-				row.add("Stop!");
-				SendTextMessageWithKeyboard(master.getChat().getId(),
-						"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
-						extractKeyboardMarkup(row));
-				canAnswer = true;
-				for (UserGame userGame : managerUsersGame.getListOfUsers()) {
-					SendTextMessage(userGame.getChat().getId(),
-							"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+			if (!alreadyStart) {
+				if (questionSelected != null) {
+					alreadyStart = true;
+					master.setStartStop(true);
+					KeyboardRow row = new KeyboardRow();
+					row.add("Stop!");
+					SendTextMessageWithKeyboard(master.getChat().getId(),
+							"I giocatori possono ora rispondere alla domanda selezionata, quando vuoi stoppare questa possibilità clicca su stop!",
+							extractKeyboardMarkup(row));
+					canAnswer = true;
+					for (UserGame userGame : managerUsersGame.getListOfUsers()) {
+						SendTextMessage(userGame.getChat().getId(),
+								"Ora puoi rispondere... Ricordati che la prima risposta che darai sarà quella definitiva!");
+					}
+				} else {
+					SendTextMessage(master.getChat().getId(), "Devi ancora scegliere la domanda!");
 				}
 			} else {
-				SendTextMessage(master.getChat().getId(), "Devi ancora scegliere la domanda!");
+				SendTextMessage(master.getChat().getId(), "Già un altro master ha abilitato le risposte!");
 			}
 			break;
 		case INVIA_MESSAGGIO:
@@ -343,7 +358,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		}
 	}
 
-	private void newUserMenu(Update update, User user, String receivedMessage) {
+	private void unknownUserMenu(Update update, User user, String receivedMessage) {
 		UserGame newGamer = new UserGame(user, update.getMessage().getChat());
 		KeyboardRow row;
 		switch (receivedMessage) {
@@ -362,7 +377,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		}
 	}
 
-	private void unknownUserMenu(User user, String receivedMessage) {
+	private void newUserMenu(User user, String receivedMessage) {
 		UserGame userGame = unknownUsersGame.getUserGame(user);
 		if (receivedMessage.equals("/master " + accessPassword)) {
 			if (masterUsersGame.isAcceptNewMaster()) {
@@ -371,6 +386,9 @@ public class QuizBot extends TelegramLongPollingBot {
 				masterUsersGame.setAcceptNewMaster(false);
 				SendTextMessageWithKeyboard(userGame.getChat().getId(), INFO_MESSAGE,
 						extractMasterKeyboard(userGame.isOtherMasterMenu()));
+				logUser(userGame.getUser().getFirstName(), userGame.getUser().getLastName(),
+						userGame.getUser().getUserName(), Long.toString(userGame.getChat().getId()), "Master",
+						Integer.toString(masterUsersGame.getListOfUsers().size()));
 			} else {
 				unknownUsersGame.removeUserGame(userGame);
 				SendTextMessageWithKeyboard(userGame.getChat().getId(),
@@ -384,6 +402,9 @@ public class QuizBot extends TelegramLongPollingBot {
 				SendTextMessageWithKeyboard(userGame.getChat().getId(),
 						"Sei stato aggiunto alla lista dei partecipanti! Ora dovrai solo aspettare l'inizio del gioco!",
 						extractAnswerKeyboard());
+				logUser(userGame.getUser().getFirstName(), userGame.getUser().getLastName(),
+						userGame.getUser().getUserName(), Long.toString(userGame.getChat().getId()), "Player",
+						Integer.toString(managerUsersGame.getListOfUsers().size()));
 				break;
 			case "No!":
 				unknownUsersGame.removeUserGame(userGame);
@@ -518,6 +539,17 @@ public class QuizBot extends TelegramLongPollingBot {
 	@Override
 	public String getBotToken() {
 		return botToken;
+	}
+
+	private void logUser(String firstName, String lastName, String userName, String chatId, String type,
+			String numberOfType) {
+		System.out.println("\n\r ----------------------------");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		System.out.println(dateFormat.format(date));
+		System.out.println("\n\r Nuovo " + type + " con fistname: " + firstName + ", lastname: " + lastName
+				+ ", username: " + userName + ", chatId: " + chatId + " \n\r Il numero di " + type
+				+ " registrati sono: " + numberOfType);
 	}
 
 }
