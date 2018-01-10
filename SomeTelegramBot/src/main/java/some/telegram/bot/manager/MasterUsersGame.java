@@ -30,7 +30,7 @@ public class MasterUsersGame extends ManagerUsersGame {
 
 	public void addNewQuestion(int settingQuestion, String settingRightQuestion, int points) {
 		Question question = listOfQuestion.get(settingQuestion - 1);
-		question.setRightQuestion(settingRightQuestion);
+		question.setRightAnswer(settingRightQuestion);
 		question.setPoints(points);
 	}
 
@@ -53,19 +53,19 @@ public class MasterUsersGame extends ManagerUsersGame {
 	public String getMasterInfoList() {
 		String userPointList = "";
 		for (UserGame userGame : getListOfUsers()) {
+			userPointList += "\n\r " + userGame.getChat().getId() + " ";
 			if (!(userGame.getUser().getUserName() == null)) {
-				userPointList += "\n\r " + userGame.getUser().getUserName();
+				userPointList += userGame.getUser().getUserName();
 			} else if (!(userGame.getUser().getFirstName() == null)) {
 				if (!(userGame.getUser().getLastName() == null)) {
-					userPointList += "\n\r " + userGame.getUser().getFirstName() + " "
-							+ userGame.getUser().getLastName();
+					userPointList += userGame.getUser().getFirstName() + " " + userGame.getUser().getLastName();
 				} else {
-					userPointList += "\n\r " + userGame.getUser().getFirstName();
+					userPointList += userGame.getUser().getFirstName();
 				}
 			} else if (!(userGame.getUser().getLastName() == null)) {
-				userPointList += "\n\r " + userGame.getUser().getLastName();
+				userPointList += userGame.getUser().getLastName();
 			} else {
-				userPointList += "\n\r NoNamePlayer";
+				userPointList += "NoNamePlayer";
 			}
 		}
 		return userPointList;

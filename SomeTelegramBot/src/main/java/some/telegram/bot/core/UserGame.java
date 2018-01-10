@@ -18,6 +18,7 @@ public class UserGame {
 	private boolean otherMasterMenu;
 	private boolean getSelectedQuestion;
 	private boolean startStop;
+	private boolean alreadyAnswerToQuestion;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -31,6 +32,7 @@ public class UserGame {
 		otherMasterMenu = true;
 		getSelectedQuestion = false;
 		startStop = false;
+		alreadyAnswerToQuestion = false;
 		settingQuestion = 0;
 		settingRightQuestion = "";
 	}
@@ -125,6 +127,18 @@ public class UserGame {
 
 	public boolean isStartStop() {
 		return startStop;
+	}
+
+	public void addPoints(int points) {
+		this.points += points;
+	}
+
+	public boolean isAlreadyAnswerToQuestion() {
+		return alreadyAnswerToQuestion;
+	}
+
+	public void setAlreadyAnswerToQuestion(boolean AlreadyAnswerToQuestion) {
+		this.alreadyAnswerToQuestion = AlreadyAnswerToQuestion;
 	}
 
 }
