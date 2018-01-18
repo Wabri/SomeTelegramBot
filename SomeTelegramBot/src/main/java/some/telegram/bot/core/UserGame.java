@@ -131,6 +131,10 @@ public class UserGame {
 		this.points += points;
 	}
 
+	public void setPoints(int points) {
+		this.points = points;
+	}
+
 	public boolean isAlreadyAnswerToQuestion() {
 		return alreadyAnswerToQuestion;
 	}

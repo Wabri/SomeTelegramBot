@@ -181,11 +181,40 @@ public class QuizBot extends TelegramLongPollingBot {
 	}
 
 	private void masterWantResetPoints(String receivedMessage, UserGame master) {
-
+		if (receivedMessage.equals(accessPassword)) {
+			for (UserGame gamer : managerUsersGame.getListOfUsers()) {
+				gamer.setPoints(0);
+			}
+			SendTextMessageWithKeyboard(master.getChat().getId(), "I punteggi sono stati azzerati!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else if (receivedMessage.equals("/annulla")) {
+			SendTextMessageWithKeyboard(master.getChat().getId(),
+					"Hai annullato il processo di azzeramento dei punteggi!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "La password inserita è sbagliata!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		}
+		master.setWantResetPoints(false);
 	}
 
 	private void masterWantResetGame(String receivedMessage, UserGame master) {
-
+		if (receivedMessage.equals(accessPassword)) {
+			managerUsersGame = new ManagerUsersGame();
+			unknownUsersGame = new ManagerUsersGame();
+			masterUsersGame = new MasterUsersGame(false);
+			masterUsersGame.addUserGame(master);
+			SendTextMessageWithKeyboard(master.getChat().getId(),
+					"Il gioco è stato riavviato!\n\rL'unico master sei te!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else if (receivedMessage.equals("/annulla")) {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di reset del gioco!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "La password inserita è sbagliata!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		}
+		master.setWantResetGame(false);
 	}
 
 	private void masterRequestStartGame(String receivedMessage, UserGame master) {
