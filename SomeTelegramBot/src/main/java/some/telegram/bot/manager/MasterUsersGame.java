@@ -14,6 +14,10 @@ public class MasterUsersGame extends ManagerUsersGame {
 	public MasterUsersGame(boolean acceptNewMaster) {
 		super();
 		this.acceptNewMaster = acceptNewMaster;
+		resetDefaultQuestion();
+	}
+
+	public void resetDefaultQuestion() {
 		listOfQuestion = new ArrayList<Question>();
 		for (int i = 1; i <= 30; i++) {
 			listOfQuestion.add(new Question(i, "", 0));

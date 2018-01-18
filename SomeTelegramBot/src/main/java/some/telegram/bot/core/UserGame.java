@@ -15,10 +15,13 @@ public class UserGame {
 	private String settingRightQuestion;
 	private boolean wantBan;
 	private boolean sendMessage;
-	private boolean otherMasterMenu;
+	private int numberMenu;
 	private boolean getSelectedQuestion;
 	private boolean startStop;
 	private boolean alreadyAnswerToQuestion;
+	private boolean wantResetGame;
+	private boolean wantResetPoints;
+	private boolean wantResetQuestions;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -28,8 +31,11 @@ public class UserGame {
 		flagAnswer = false;
 		flagPoints = false;
 		wantBan = false;
+		wantResetGame = false;
+		wantResetPoints = false;
+		wantResetQuestions = false;
 		sendMessage = false;
-		otherMasterMenu = true;
+		numberMenu = 0;
 		getSelectedQuestion = false;
 		startStop = false;
 		alreadyAnswerToQuestion = false;
@@ -105,14 +111,6 @@ public class UserGame {
 		return sendMessage;
 	}
 
-	public boolean isOtherMasterMenu() {
-		return otherMasterMenu;
-	}
-
-	public void setOtherMasterMenu(boolean otherMasterMenu) {
-		this.otherMasterMenu = otherMasterMenu;
-	}
-
 	public boolean isGetSelectedQuestion() {
 		return getSelectedQuestion;
 	}
@@ -133,12 +131,48 @@ public class UserGame {
 		this.points += points;
 	}
 
+	public void setPoints(int points) {
+		this.points = points;
+	}
+
 	public boolean isAlreadyAnswerToQuestion() {
 		return alreadyAnswerToQuestion;
 	}
 
 	public void setAlreadyAnswerToQuestion(boolean AlreadyAnswerToQuestion) {
 		this.alreadyAnswerToQuestion = AlreadyAnswerToQuestion;
+	}
+
+	public int getNumberMenu() {
+		return numberMenu;
+	}
+
+	public void nextNumberMenu() {
+		this.numberMenu = (numberMenu + 1) % 3;
+	}
+
+	public boolean isWantResetGame() {
+		return wantResetGame;
+	}
+
+	public void setWantResetGame(boolean wantResetGame) {
+		this.wantResetGame = wantResetGame;
+	}
+
+	public boolean isWantResetPoints() {
+		return wantResetPoints;
+	}
+
+	public void setWantResetPoints(boolean wantResetPoints) {
+		this.wantResetPoints = wantResetPoints;
+	}
+
+	public boolean isWantResetQuestions() {
+		return wantResetQuestions;
+	}
+
+	public void setWantResetQuestions(boolean wantResetQuestions) {
+		this.wantResetQuestions = wantResetQuestions;
 	}
 
 }

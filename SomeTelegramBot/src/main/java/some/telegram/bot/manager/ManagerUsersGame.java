@@ -30,8 +30,8 @@ public class ManagerUsersGame {
 
 	public void orderGamersList() {
 		if (!listOfUsers.isEmpty()) {
-			Collections.sort(listOfUsers, (gamerX, gamerY) -> gamerX.getPoints() < gamerY.getPoints() ? -1
-					: gamerX.getPoints() >= gamerY.getPoints() ? 0 : 1);
+			Collections.sort(listOfUsers, (gamerX, gamerY) -> gamerX.getPoints() > gamerY.getPoints() ? -1
+					: gamerX.getPoints() <= gamerY.getPoints() ? 0 : 1);
 		}
 	}
 
@@ -56,7 +56,6 @@ public class ManagerUsersGame {
 	public String getUsersPointsList() {
 		String userPointList = "";
 		for (UserGame userGame : listOfUsers) {
-			userPointList += "\n\r " + userGame.getChat().getId() + " ";
 			if (!(userGame.getUser().getUserName() == null)) {
 				userPointList += userGame.getUser().getUserName() + " -> " + userGame.getPoints();
 			} else if (!(userGame.getUser().getFirstName() == null)) {
@@ -71,6 +70,7 @@ public class ManagerUsersGame {
 			} else {
 				userPointList += userGame.getChat().getId() + " -> " + userGame.getPoints();
 			}
+			userPointList += "\n\r";
 		}
 		return userPointList;
 	}
@@ -91,6 +91,28 @@ public class ManagerUsersGame {
 			}
 		}
 		return null;
+	}
+
+	public String getUsersChatIdList() {
+		String userPointList = "";
+		for (UserGame userGame : listOfUsers) {
+			if (!(userGame.getUser().getUserName() == null)) {
+				userPointList += userGame.getUser().getUserName() + " -> " + userGame.getChat().getId();
+			} else if (!(userGame.getUser().getFirstName() == null)) {
+				if (!(userGame.getUser().getLastName() == null)) {
+					userPointList += userGame.getUser().getFirstName() + " " + userGame.getUser().getLastName() + " -> "
+							+ userGame.getChat().getId();
+				} else {
+					userPointList += userGame.getUser().getFirstName() + " -> " + userGame.getChat().getId();
+				}
+			} else if (!(userGame.getUser().getLastName() == null)) {
+				userPointList += userGame.getUser().getLastName() + " -> " + userGame.getChat().getId();
+			} else {
+				userPointList += userGame.getChat().getId() + " -> " + userGame.getChat().getId();
+			}
+			userPointList += "\n\r";
+		}
+		return userPointList;
 	}
 
 }
