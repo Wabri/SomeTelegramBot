@@ -22,7 +22,12 @@ import some.telegram.bot.manager.MasterUsersGame;
 
 public class QuizBot extends TelegramLongPollingBot {
 
-	private static final String INFO = "Info";
+	private static final String RESET_GIOCO = "ResetGioco";
+	private static final String RESET_PUNTEGGI = "ResetPunteggi";
+	private static final String RESET_DOMANDE = "ResetDomande";
+	private static final String START_STOP_PARTECIPANTI = "Start/StopPartecipanti";
+	private static final String PARTECIPANTI_CHAT_ID = "PartecipantiChatId";
+	private static final String PUNTEGGIO_GIOCATORI = "PunteggioGiocatori";
 	private static final String INVIA_MESSAGGIO = "InviaMessaggio";
 	private static final String START = "Start";
 	private static final String SELEZIONA_DOMANDA = "SelezionaDomanda";
@@ -30,25 +35,8 @@ public class QuizBot extends TelegramLongPollingBot {
 	private static final String BAN_USER = "BanUser";
 	private static final String LISTA_MASTER = "ListaMaster";
 	private static final String NUOVO_MASTER = "NuovoMaster";
-	private static final String LISTA_GIOCATORI = "ListaGiocatori";
 	private static final String LISTA_DOMANDE = "ListaDomande";
 	private static final String NUOVA_DOMANDA = "NuovaDomanda";
-	private static final String INFO_MESSAGE = "I comandi che puoi usare puoi usare sono tutti nella sezione dei pulsanti: \n\r\n\r"
-			+ INFO
-			+ ": fornisce tutte le informazioni tra cui la spiegazione dei comandi, la lista dei giocatori e tutto ciò di cui puoi avere bisogno \n\r\n\r"
-			+ SELEZIONA_DOMANDA
-			+ ": questo ti permetterà di selezionare la domanda da fare ai giocatori (ricorda che prima di selezionare la domanda dovrai impostarla usando il comando "
-			+ NUOVA_DOMANDA + ") \n\r\n\r" + START
-			+ ": permette di dare il via al gioco, saranno infatti abilitate le risposte dei giocatori fino a che non sarà cliccato il pulsante di stop \n\r\n\r"
-			+ LISTA_GIOCATORI
-			+ ": restituisce la lista di tutti i partecipanti sotto forma di username->punteggio \n\r\n\r"
-			+ INVIA_MESSAGGIO + ": permette di inviare un messaggio a tutti i partecipanti del gioco \n\r\n\r"
-			+ NUOVA_DOMANDA + ": permette di creare (o sovrascrivere) una nuova domanda \n\r\n\r" + LISTA_DOMANDE
-			+ ": restituisce la lista di tutte le domande sotto forma di domanda->risposta->punteggio (anche le domande non impostate) \n\r\n\r"
-			+ NUOVO_MASTER + ": abilita la possibilità ad uno user di diventare master \n\r\n\r" + LISTA_MASTER
-			+ ": restituisce la lista dei master\n\r\n\r" + BAN_USER
-			+ ": cliccato questo pulsante è possibile eliminare uno user (indipendentemente che sia master o normale user)\n\r\n\r"
-			+ ALTRO + ": cambia i pulsanti nella tastiera\n\r\n\r";
 
 	private ManagerUsersGame managerUsersGame;
 	private ManagerUsersGame unknownUsersGame;
@@ -128,7 +116,7 @@ public class QuizBot extends TelegramLongPollingBot {
 									masterNewQuestionRequestQuestion(receivedMessage, master);
 								}
 							} else {
-								masterNewAnswerRequestQuestio(receivedMessage, master);
+								masterNewAnswerRequestQuestion(receivedMessage, master);
 							}
 						} else {
 							masterNewPointRequestQuestion(receivedMessage, master);
@@ -174,7 +162,7 @@ public class QuizBot extends TelegramLongPollingBot {
 			questionSelected = masterUsersGame.getQuestion((Integer.parseInt(receivedMessage)));
 			SendTextMessageWithKeyboard(master.getChat().getId(),
 					"Hai selezionato la domanda:\n\r" + questionSelected.toString(),
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 			master.setGetSelectedQuestion(false);
 		}
 	}
@@ -185,10 +173,10 @@ public class QuizBot extends TelegramLongPollingBot {
 				SendTextMessage(receiver.getChat().getId(), receivedMessage);
 			}
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Il messaggio inviato è: " + receivedMessage,
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 		} else {
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di invio messaggi!",
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 		}
 		master.setSendMessage(false);
 	}
@@ -204,24 +192,24 @@ public class QuizBot extends TelegramLongPollingBot {
 						userBan = masterUsersGame.getUserGame(chatIdToBan);
 						if (userBan == null) {
 							SendTextMessageWithKeyboard(master.getChat().getId(), "Non esiste nessuno con questo nome",
-									extractMasterKeyboard(master.isOtherMasterMenu()));
+									extractMasterKeyboard(master.getNumberMenu()));
 						} else {
 							masterUsersGame.removeUserGame(userBan);
 							SendTextMessageWithKeyboard(master.getChat().getId(),
 									"Il master " + userBan.getUser().getUserName() + " è stato bannato!",
-									extractMasterKeyboard(master.isOtherMasterMenu()));
+									extractMasterKeyboard(master.getNumberMenu()));
 						}
 					} else {
 						unknownUsersGame.removeUserGame(userBan);
 						SendTextMessageWithKeyboard(master.getChat().getId(),
 								"Il giocatore " + userBan.getUser().getUserName() + " è stato bannato!",
-								extractMasterKeyboard(master.isOtherMasterMenu()));
+								extractMasterKeyboard(master.getNumberMenu()));
 					}
 				} else {
 					managerUsersGame.removeUserGame(userBan);
 					SendTextMessageWithKeyboard(master.getChat().getId(),
 							"Il giocatore " + userBan.getUser().getUserName() + " è stato bannato!",
-							extractMasterKeyboard(master.isOtherMasterMenu()));
+							extractMasterKeyboard(master.getNumberMenu()));
 				}
 				if (userBan != null) {
 					SendTextMessageWithKeyboard(userBan.getChat().getId(), "Mi dispiace ma sei stato bannato!",
@@ -229,11 +217,11 @@ public class QuizBot extends TelegramLongPollingBot {
 				}
 			} else {
 				SendTextMessageWithKeyboard(master.getChat().getId(), "Non puoi bannare te stesso!",
-						extractMasterKeyboard(master.isOtherMasterMenu()));
+						extractMasterKeyboard(master.getNumberMenu()));
 			}
 		} else {
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di ban!",
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 		}
 		master.setWantBan(false);
 	}
@@ -245,7 +233,7 @@ public class QuizBot extends TelegramLongPollingBot {
 			SendTextMessageWithKeyboard(master.getChat().getId(),
 					"La domanda creata è: \n\r"
 							+ masterUsersGame.getListOfQuestion().get(master.getSettingQuestion() - 1).toString(),
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 			master.setSettingQuestion(0);
 			master.setSettingRightQuestion("");
 			master.setFlagPoints(false);
@@ -254,7 +242,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		}
 	}
 
-	private void masterNewAnswerRequestQuestio(String receivedMessage, UserGame master) {
+	private void masterNewAnswerRequestQuestion(String receivedMessage, UserGame master) {
 		if ((receivedMessage.equals("A")) || (receivedMessage.equals("B")) || (receivedMessage.equals("C"))
 				|| (receivedMessage.equals("D"))) {
 			master.setFlagAnswer(false);
@@ -281,6 +269,28 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	private void masterParserMessage(String receivedMessage, UserGame master) {
 		switch (receivedMessage) {
+		case RESET_GIOCO:
+			break;
+		case RESET_PUNTEGGI:
+			break;
+		case RESET_DOMANDE:
+			break;
+		case START_STOP_PARTECIPANTI:
+			break;
+		case PARTECIPANTI_CHAT_ID:
+			SendTextMessage(master.getChat().getId(),
+					"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+							+ " \n\rLa lista dei giocatori con chat id è: \n\r" + managerUsersGame.getUsersChatIdList()
+							+ "\n\rIl numero dei master è: " + masterUsersGame.getListOfUsers().size()
+							+ "\n\rLa lista dei master è: \n\r" + masterUsersGame.getUsersChatIdList());
+			break;
+		case PUNTEGGIO_GIOCATORI:
+			managerUsersGame.orderGamersList();
+			SendTextMessage(master.getChat().getId(),
+					"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
+							+ " \n\rLa lista dei giocatori è in ordine decrescente: \n\r"
+							+ managerUsersGame.getUsersPointsList());
+			break;
 		case NUOVA_DOMANDA:
 			master.setFlagQuestion(true);
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Quale domanda vuoi impostare?",
@@ -289,13 +299,6 @@ public class QuizBot extends TelegramLongPollingBot {
 		case LISTA_DOMANDE:
 			SendTextMessage(master.getChat().getId(),
 					"Ecco la lista delle domande:\n\r" + masterUsersGame.getStringListOfQuestion());
-			break;
-		case LISTA_GIOCATORI:
-			managerUsersGame.orderGamersList();
-			SendTextMessage(master.getChat().getId(),
-					"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
-							+ " \n\rLa lista dei giocatori è in ordine decrescente:"
-							+ managerUsersGame.getUsersPointsList());
 			break;
 		case NUOVO_MASTER:
 			masterUsersGame.setAcceptNewMaster(true);
@@ -343,17 +346,14 @@ public class QuizBot extends TelegramLongPollingBot {
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci il messaggio da inviare!",
 					extractDeleteKeyboard());
 			break;
-		case INFO:
-			SendTextMessage(master.getChat().getId(), INFO_MESSAGE);
-			break;
 		case ALTRO:
-			master.setOtherMasterMenu(!master.isOtherMasterMenu());
+			master.nextNumberMenu();
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Questi sono gli altri comandi!",
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 			break;
 		default:
 			SendTextMessageWithKeyboard(master.getChat().getId(), "Usa i pulsanti, non so come aiutarti altrimenti!",
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 			break;
 		}
 	}
@@ -384,8 +384,8 @@ public class QuizBot extends TelegramLongPollingBot {
 				masterUsersGame.addUserGame(userGame);
 				unknownUsersGame.removeUserGame(userGame);
 				masterUsersGame.setAcceptNewMaster(false);
-				SendTextMessageWithKeyboard(userGame.getChat().getId(), INFO_MESSAGE,
-						extractMasterKeyboard(userGame.isOtherMasterMenu()));
+				SendTextMessageWithKeyboard(userGame.getChat().getId(), "Utilizzando i pulsanti puoi gestire tutto!",
+						extractMasterKeyboard(userGame.getNumberMenu()));
 				logUser(userGame.getUser().getFirstName(), userGame.getUser().getLastName(),
 						userGame.getUser().getUserName(), Long.toString(userGame.getChat().getId()), "Master",
 						Integer.toString(masterUsersGame.getListOfUsers().size()));
@@ -473,20 +473,20 @@ public class QuizBot extends TelegramLongPollingBot {
 		if (numberMenu == 0) {
 			row1.add(SELEZIONA_DOMANDA);
 			row1.add(START);
-			row2.add("Punteggio giocatori");
+			row2.add(PUNTEGGIO_GIOCATORI);
 			row2.add(INVIA_MESSAGGIO);
 			row3.add(ALTRO);
 		} else if (numberMenu == 1) {
 			row1.add(NUOVA_DOMANDA);
 			row1.add(LISTA_DOMANDE);
 			row2.add(BAN_USER);
-			row2.add("Partecipanti ChatId");
-			row3.add("Start/Stop partecipanti");
+			row2.add(PARTECIPANTI_CHAT_ID);
+			row3.add(START_STOP_PARTECIPANTI);
 			row3.add(ALTRO);
 		} else if (numberMenu == 2) {
-			row1.add("Reset Domande");
-			row1.add("Reset Punteggi");
-			row2.add("Reset Gioco");
+			row1.add(RESET_DOMANDE);
+			row1.add(RESET_PUNTEGGI);
+			row2.add(RESET_GIOCO);
 			row2.add(NUOVO_MASTER);
 			row3.add(ALTRO);
 		}
