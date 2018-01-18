@@ -15,7 +15,7 @@ public class UserGame {
 	private String settingRightQuestion;
 	private boolean wantBan;
 	private boolean sendMessage;
-	private boolean otherMasterMenu;
+	private int numberMenu;
 	private boolean getSelectedQuestion;
 	private boolean startStop;
 	private boolean alreadyAnswerToQuestion;
@@ -29,7 +29,7 @@ public class UserGame {
 		flagPoints = false;
 		wantBan = false;
 		sendMessage = false;
-		otherMasterMenu = true;
+		numberMenu = 0;
 		getSelectedQuestion = false;
 		startStop = false;
 		alreadyAnswerToQuestion = false;
@@ -105,14 +105,6 @@ public class UserGame {
 		return sendMessage;
 	}
 
-	public boolean isOtherMasterMenu() {
-		return otherMasterMenu;
-	}
-
-	public void setOtherMasterMenu(boolean otherMasterMenu) {
-		this.otherMasterMenu = otherMasterMenu;
-	}
-
 	public boolean isGetSelectedQuestion() {
 		return getSelectedQuestion;
 	}
@@ -139,6 +131,14 @@ public class UserGame {
 
 	public void setAlreadyAnswerToQuestion(boolean AlreadyAnswerToQuestion) {
 		this.alreadyAnswerToQuestion = AlreadyAnswerToQuestion;
+	}
+
+	public int getNumberMenu() {
+		return numberMenu;
+	}
+
+	public void nextNumberMenu() {
+		this.numberMenu = (numberMenu + 1) % 3;
 	}
 
 }

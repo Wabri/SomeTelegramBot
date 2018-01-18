@@ -152,7 +152,7 @@ public class QuizBot extends TelegramLongPollingBot {
 			SendTextMessageWithKeyboard(master.getChat().getId(),
 					"Hai stoppato la possibilità di rispondere, il numero delle risposte ricevute sono: "
 							+ numberOfAnswer,
-					extractMasterKeyboard(master.isOtherMasterMenu()));
+					extractMasterKeyboard(master.getNumberMenu()));
 			for (UserGame userGame : managerUsersGame.getListOfUsers()) {
 				SendTextMessage(userGame.getChat().getId(), "Stop alle risposte!");
 			}
@@ -466,23 +466,28 @@ public class QuizBot extends TelegramLongPollingBot {
 		return extractKeyboardMarkup(row1, row2);
 	}
 
-	private ReplyKeyboardMarkup extractMasterKeyboard(boolean user) {
+	private ReplyKeyboardMarkup extractMasterKeyboard(int numberMenu) {
 		KeyboardRow row1 = new KeyboardRow();
 		KeyboardRow row2 = new KeyboardRow();
 		KeyboardRow row3 = new KeyboardRow();
-		if (user) {
-			row1.add(NUOVA_DOMANDA);
-			row1.add(LISTA_DOMANDE);
-			row2.add(NUOVO_MASTER);
-			row2.add(LISTA_MASTER);
-			row3.add(BAN_USER);
-			row3.add(ALTRO);
-		} else {
+		if (numberMenu == 0) {
 			row1.add(SELEZIONA_DOMANDA);
 			row1.add(START);
-			row2.add(LISTA_GIOCATORI);
+			row2.add("Punteggio giocatori");
 			row2.add(INVIA_MESSAGGIO);
-			row3.add(INFO);
+			row3.add(ALTRO);
+		} else if (numberMenu == 1) {
+			row1.add(NUOVA_DOMANDA);
+			row1.add(LISTA_DOMANDE);
+			row2.add(BAN_USER);
+			row2.add("Partecipanti ChatId");
+			row3.add("Start/Stop partecipanti");
+			row3.add(ALTRO);
+		} else if (numberMenu == 2) {
+			row1.add("Reset Domande");
+			row1.add("Reset Punteggi");
+			row2.add("Reset Gioco");
+			row2.add(NUOVO_MASTER);
 			row3.add(ALTRO);
 		}
 		return extractKeyboardMarkup(row1, row2, row3);
