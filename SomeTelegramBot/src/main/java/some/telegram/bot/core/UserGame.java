@@ -19,6 +19,9 @@ public class UserGame {
 	private boolean getSelectedQuestion;
 	private boolean startStop;
 	private boolean alreadyAnswerToQuestion;
+	private boolean wantResetGame;
+	private boolean wantResetPoints;
+	private boolean wantResetQuestions;
 
 	public UserGame(User user, Chat chat) {
 		this.user = user;
@@ -28,6 +31,9 @@ public class UserGame {
 		flagAnswer = false;
 		flagPoints = false;
 		wantBan = false;
+		wantResetGame = false;
+		wantResetPoints = false;
+		wantResetQuestions = false;
 		sendMessage = false;
 		numberMenu = 0;
 		getSelectedQuestion = false;
@@ -139,6 +145,30 @@ public class UserGame {
 
 	public void nextNumberMenu() {
 		this.numberMenu = (numberMenu + 1) % 3;
+	}
+
+	public boolean isWantResetGame() {
+		return wantResetGame;
+	}
+
+	public void setWantResetGame(boolean wantResetGame) {
+		this.wantResetGame = wantResetGame;
+	}
+
+	public boolean isWantResetPoints() {
+		return wantResetPoints;
+	}
+
+	public void setWantResetPoints(boolean wantResetPoints) {
+		this.wantResetPoints = wantResetPoints;
+	}
+
+	public boolean isWantResetQuestions() {
+		return wantResetQuestions;
+	}
+
+	public void setWantResetQuestions(boolean wantResetQuestions) {
+		this.wantResetQuestions = wantResetQuestions;
 	}
 
 }

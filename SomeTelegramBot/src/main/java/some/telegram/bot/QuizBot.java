@@ -49,6 +49,7 @@ public class QuizBot extends TelegramLongPollingBot {
 	private int numberOfAnswer;
 	private boolean canAnswer;
 	private boolean alreadyStart;
+	private boolean allowNewPlayer;
 
 	public QuizBot(String botUsername, String botToken) {
 		managerUsersGame = new ManagerUsersGame();
@@ -60,6 +61,7 @@ public class QuizBot extends TelegramLongPollingBot {
 		questionSelected = null;
 		canAnswer = false;
 		alreadyStart = false;
+		allowNewPlayer = true;
 		numberOfAnswer = 0;
 		System.out.println("Access Password: " + accessPassword);
 	}
@@ -104,35 +106,70 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	private void masterUserMenu(User user, String receivedMessage) {
 		UserGame master = masterUsersGame.getUserGame(user);
-		if (!master.isStartStop()) {
-			if (!master.isGetSelectedQuestion()) {
-				if (!master.isSendMessage()) {
-					if (!master.isWantBan()) {
-						if (!master.isFlagPoints()) {
-							if (!master.isFlagAnswer()) {
-								if (!master.isFlagQuestion()) {
-									masterParserMessage(receivedMessage, master);
+		if (!master.isWantResetQuestions()) {
+			if (!master.isWantResetPoints()) {
+				if (!master.isWantResetGame()) {
+					if (!master.isStartStop()) {
+						if (!master.isGetSelectedQuestion()) {
+							if (!master.isSendMessage()) {
+								if (!master.isWantBan()) {
+									if (!master.isFlagPoints()) {
+										if (!master.isFlagAnswer()) {
+											if (!master.isFlagQuestion()) {
+												masterParserMessage(receivedMessage, master);
+											} else {
+												masterNewQuestionRequestQuestion(receivedMessage, master);
+											}
+										} else {
+											masterNewAnswerRequestQuestion(receivedMessage, master);
+										}
+									} else {
+										masterNewPointRequestQuestion(receivedMessage, master);
+									}
 								} else {
-									masterNewQuestionRequestQuestion(receivedMessage, master);
+									masterRequestBan(receivedMessage, master);
 								}
 							} else {
-								masterNewAnswerRequestQuestion(receivedMessage, master);
+								masterRequestSendMessage(receivedMessage, master);
 							}
 						} else {
-							masterNewPointRequestQuestion(receivedMessage, master);
+							masterRequestSelectQuestion(receivedMessage, master);
 						}
 					} else {
-						masterRequestBan(receivedMessage, master);
+						masterRequestStartGame(receivedMessage, master);
 					}
 				} else {
-					masterRequestSendMessage(receivedMessage, master);
+					masterWantResetGame(receivedMessage, master);
 				}
 			} else {
-				masterRequestSelectQuestion(receivedMessage, master);
+				masterWantResetPoints(receivedMessage, master);
 			}
 		} else {
-			masterRequestStartGame(receivedMessage, master);
+			masterWantResetQuestions(receivedMessage, master);
 		}
+	}
+
+	private void masterWantResetQuestions(String receivedMessage, UserGame master) {
+		if (receivedMessage.equals(accessPassword)) {
+			masterUsersGame.resetDefaultQuestion();
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Le domande sono state resettate!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else if (receivedMessage.equals("/annulla")) {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Hai annullato il processo di reset delle domande!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		} else {
+			SendTextMessageWithKeyboard(master.getChat().getId(), "La password inserita è sbagliata!",
+					extractMasterKeyboard(master.getNumberMenu()));
+		}
+		master.setWantResetQuestions(false);
+	}
+
+	private void masterWantResetPoints(String receivedMessage, UserGame master) {
+
+	}
+
+	private void masterWantResetGame(String receivedMessage, UserGame master) {
+
 	}
 
 	private void masterRequestStartGame(String receivedMessage, UserGame master) {
@@ -270,17 +307,33 @@ public class QuizBot extends TelegramLongPollingBot {
 	private void masterParserMessage(String receivedMessage, UserGame master) {
 		switch (receivedMessage) {
 		case RESET_GIOCO:
+			master.setWantResetGame(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci la access password!",
+					extractDeleteKeyboard());
 			break;
 		case RESET_PUNTEGGI:
+			master.setWantResetPoints(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci la access password!",
+					extractDeleteKeyboard());
 			break;
 		case RESET_DOMANDE:
+			master.setWantResetQuestions(true);
+			SendTextMessageWithKeyboard(master.getChat().getId(), "Inserisci la access password!",
+					extractDeleteKeyboard());
 			break;
 		case START_STOP_PARTECIPANTI:
+			if (allowNewPlayer) {
+				SendTextMessage(master.getChat().getId(), "Hai disabilitato la possibilità di entrare in gioco!");
+			} else {
+				SendTextMessage(master.getChat().getId(), "Hai abilitato la possibilità di entrare in gioco!");
+			}
+			unknownUsersGame.getListOfUsers().clear();
+			allowNewPlayer = !allowNewPlayer;
 			break;
 		case PARTECIPANTI_CHAT_ID:
 			SendTextMessage(master.getChat().getId(),
 					"Il numero dei partecipanti è: " + managerUsersGame.getListOfUsers().size()
-							+ " \n\rLa lista dei giocatori con chat id è: \n\r" + managerUsersGame.getUsersChatIdList()
+							+ "\n\rLa lista dei giocatori con chat id è: \n\r" + managerUsersGame.getUsersChatIdList()
 							+ "\n\rIl numero dei master è: " + masterUsersGame.getListOfUsers().size()
 							+ "\n\rLa lista dei master è: \n\r" + masterUsersGame.getUsersChatIdList());
 			break;
@@ -361,19 +414,23 @@ public class QuizBot extends TelegramLongPollingBot {
 	private void unknownUserMenu(Update update, User user, String receivedMessage) {
 		UserGame newGamer = new UserGame(user, update.getMessage().getChat());
 		KeyboardRow row;
-		switch (receivedMessage) {
-		case "/start":
-			unknownUsersGame.addUserGame(newGamer);
-			row = new KeyboardRow();
-			row.add("Si!");
-			row.add("No!");
-			SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", extractKeyboardMarkup(row));
-			break;
-		default:
-			unknownUsersGame.removeUserGame(newGamer);
-			SendTextMessageWithKeyboard(newGamer.getChat().getId(),
-					"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", extractStartKeyboard());
-			break;
+		if (allowNewPlayer) {
+			switch (receivedMessage) {
+			case "/start":
+				unknownUsersGame.addUserGame(newGamer);
+				row = new KeyboardRow();
+				row.add("Si!");
+				row.add("No!");
+				SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", extractKeyboardMarkup(row));
+				break;
+			default:
+				unknownUsersGame.removeUserGame(newGamer);
+				SendTextMessageWithKeyboard(newGamer.getChat().getId(),
+						"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", extractStartKeyboard());
+				break;
+			}
+		} else {
+			SendTextMessage(newGamer.getChat().getId(), "Mi dispiace ma non è più possibile entrare in gioco!");
 		}
 	}
 
