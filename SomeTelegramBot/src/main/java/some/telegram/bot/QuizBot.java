@@ -78,20 +78,36 @@ public class QuizBot extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		try {
-			User user = update.getMessage().getFrom();
-			String receivedMessage = update.getMessage().getText();
-			if (masterUsersGame.containUserGame(user)) {
-				masterUserMenu(user, receivedMessage);
-			} else if (managerUsersGame.containUserGame(user)) {
-				playerUserMenu(user, receivedMessage);
-			} else if (!unknownUsersGame.containUserGame(user)) {
-				unknownUserMenu(update, user, receivedMessage);
-			} else if (unknownUsersGame.containUserGame(user)) {
-				newUserMenu(user, receivedMessage);
+		if (update.getMessage().getPhoto() == null) {
+			if (update.getMessage().getVoice() == null) {
+				if (update.getMessage().getSticker() == null) {
+					if (update.getMessage().hasText()) {
+						try {
+							User user = update.getMessage().getFrom();
+							String receivedMessage = update.getMessage().getText();
+							if (masterUsersGame.containUserGame(user)) {
+								masterUserMenu(user, receivedMessage);
+							} else if (managerUsersGame.containUserGame(user)) {
+								playerUserMenu(user, receivedMessage);
+							} else if (!unknownUsersGame.containUserGame(user)) {
+								unknownUserMenu(update, user, receivedMessage);
+							} else if (unknownUsersGame.containUserGame(user)) {
+								newUserMenu(user, receivedMessage);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					} else {
+						SendTextMessage(update.getMessage().getChatId(), "Non so cosa sia questa roba!");
+					}
+				} else {
+					SendTextMessage(update.getMessage().getChatId(), "Che bello sticker!");
+				}
+			} else {
+				SendTextMessage(update.getMessage().getChatId(), "Mi dispiace ma non sento quello che dici!");
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} else {
+			SendTextMessage(update.getMessage().getChatId(), "Mi dispiace ma non ho gli occhi per vedere le foto!");
 		}
 	}
 
@@ -370,7 +386,9 @@ public class QuizBot extends TelegramLongPollingBot {
 			SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", extractKeyboardMarkup(row));
 			break;
 		default:
-			unknownUsersGame.removeUserGame(newGamer);
+			if (unknownUsersGame.containUserGame(newGamer.getUser())) {
+				unknownUsersGame.removeUserGame(newGamer);
+			}
 			SendTextMessageWithKeyboard(newGamer.getChat().getId(),
 					"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", extractStartKeyboard());
 			break;
