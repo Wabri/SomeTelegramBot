@@ -424,7 +424,9 @@ public class QuizBot extends TelegramLongPollingBot {
 				SendTextMessageWithKeyboard(newGamer.getChat().getId(), "Vuoi giocare?", extractKeyboardMarkup(row));
 				break;
 			default:
-				unknownUsersGame.removeUserGame(newGamer);
+				if (unknownUsersGame.containUserGame(newGamer.getUser())) {
+					unknownUsersGame.removeUserGame(newGamer);
+				}
 				SendTextMessageWithKeyboard(newGamer.getChat().getId(),
 						"Non so chi sei... Per iniziare a giocare clicca il pulsante start!", extractStartKeyboard());
 				break;
